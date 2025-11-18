@@ -81,7 +81,7 @@ class AdherenceChart extends StatelessWidget {
       painter: AdherenceChartPainter(
         data: data,
         primaryColor: Theme.of(context).colorScheme.primary,
-        backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
       ),
     );
   }

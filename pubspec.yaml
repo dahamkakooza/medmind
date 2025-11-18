@@ -1,0 +1,67 @@
+name: medmind
+description: A medication management and adherence tracking application
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.0
+  flutter: ">=3.24.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # UI
+  cupertino_icons: ^1.0.8
+  
+  # State Management
+  flutter_bloc: ^8.1.6
+  equatable: ^2.0.5
+  
+  # Dependency Injection
+  get_it: ^7.7.0
+  injectable: ^2.4.4
+  
+  # Firebase
+  firebase_core: ^3.6.0
+  firebase_auth: ^5.3.1
+  cloud_firestore: ^5.4.4
+  firebase_storage: ^12.3.4
+  google_sign_in: ^6.2.2
+  
+  # Functional Programming
+  dartz: ^0.10.1
+  
+  # Network
+  http: ^1.2.2
+  
+  # Local Storage
+  shared_preferences: ^2.3.2
+  
+  # Notifications
+  flutter_local_notifications: ^17.2.3
+  
+  # Barcode Scanner
+  mobile_scanner: ^5.2.3
+  
+  # Charts & Visualization
+  fl_chart: ^0.69.0
+  
+  # Date & Time
+  intl: ^0.19.0
+  
+  # Permissions
+  permission_handler: ^11.3.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  build_runner: ^2.4.0
+  injectable_generator: ^2.6.2
+  mockito: ^5.4.4
+  bloc_test: ^9.1.7
+
+flutter:
+  uses-material-design: true
+  # Add assets, fonts, etc.

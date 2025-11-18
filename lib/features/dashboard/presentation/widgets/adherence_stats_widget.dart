@@ -107,7 +107,7 @@ class AdherenceStatsWidget extends StatelessWidget {
             CircularProgressIndicator(
               value: percentage / 100,
               strokeWidth: 8,
-              backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
               valueColor: AlwaysStoppedAnimation<Color>(color),
             ),
             Center(
