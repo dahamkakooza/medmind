@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../blocs/barcode_bloc/barcode_bloc.dart';
-import '../blocs/barcode_bloc/barcode_event.dart';
-import '../blocs/barcode_bloc/barcode_state.dart';
 
 class BarcodeScanner extends StatelessWidget {
   const BarcodeScanner({super.key});
