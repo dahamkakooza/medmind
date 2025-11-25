@@ -35,26 +35,28 @@ import 'features/auth/domain/usecases/sign_out.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   try {
     // Initialize Firebase
     await FirebaseConfig.initialize();
-    
+
     // Initialize notifications
     await NotificationUtils.initialize();
-    
+
     // Get SharedPreferences instance
     final sharedPreferences = await SharedPreferences.getInstance();
-    
+
     runApp(MedMindApp(sharedPreferences: sharedPreferences));
   } catch (e) {
     // If Firebase initialization fails, still run the app but show error
     print('Firebase initialization failed: $e');
     final sharedPreferences = await SharedPreferences.getInstance();
-    runApp(MedMindApp(
-      sharedPreferences: sharedPreferences,
-      initializationError: e.toString(),
-    ));
+    runApp(
+      MedMindApp(
+        sharedPreferences: sharedPreferences,
+        initializationError: e.toString(),
+      ),
+    );
   }
 }
 
@@ -114,7 +116,9 @@ class MedMindApp extends StatelessWidget {
             create: (context) {
               final authRepo = context.read<AuthRepositoryImpl>();
               return AuthBloc(
-                signInWithEmailAndPassword: SignInWithEmailAndPassword(authRepo),
+                signInWithEmailAndPassword: SignInWithEmailAndPassword(
+                  authRepo,
+                ),
                 signInWithGoogle: SignInWithGoogle(authRepo),
                 signUp: SignUp(authRepo),
                 signOut: SignOut(authRepo),
@@ -167,11 +171,7 @@ class SplashScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.medical_services,
-              size: 80,
-              color: Colors.white,
-            ),
+            Icon(Icons.medical_services, size: 80, color: Colors.white),
             SizedBox(height: 24),
             Text(
               'MedMind',
@@ -184,10 +184,7 @@ class SplashScreen extends StatelessWidget {
             SizedBox(height: 16),
             Text(
               'Your Medication Companion',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.white70,
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.white70),
             ),
             SizedBox(height: 48),
             CircularProgressIndicator(
@@ -215,11 +212,7 @@ class ErrorScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.error_outline,
-                size: 80,
-                color: Colors.red.shade400,
-              ),
+              Icon(Icons.error_outline, size: 80, color: Colors.red.shade400),
               const SizedBox(height: 24),
               const Text(
                 'Initialization Error',
@@ -233,10 +226,7 @@ class ErrorScreen extends StatelessWidget {
               Text(
                 'Failed to initialize the app. Please check your Firebase configuration.',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.red.shade700,
-                ),
+                style: TextStyle(fontSize: 16, color: Colors.red.shade700),
               ),
               const SizedBox(height: 24),
               Container(
@@ -247,10 +237,7 @@ class ErrorScreen extends StatelessWidget {
                 ),
                 child: Text(
                   error,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontFamily: 'monospace',
-                  ),
+                  style: const TextStyle(fontSize: 12, fontFamily: 'monospace'),
                 ),
               ),
               const SizedBox(height: 24),

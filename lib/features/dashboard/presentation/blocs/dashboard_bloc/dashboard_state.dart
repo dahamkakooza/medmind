@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
-import '../../../medication/domain/entities/medication_entity.dart';
-import '../../domain/entities/adherence_entity.dart';
+import 'package:medmind/features/medication/domain/entities/medication_entity.dart';
+import 'package:medmind/features/dashboard/domain/entities/adherence_entity.dart';
 
 abstract class DashboardState extends Equatable {
   const DashboardState();

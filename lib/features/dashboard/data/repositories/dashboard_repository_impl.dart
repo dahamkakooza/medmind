@@ -19,20 +19,16 @@ class DashboardRepositoryImpl implements DashboardRepository {
   String get _currentUserId => firebaseAuth.currentUser?.uid ?? '';
 
   @override
-  Future<Either<Failure, List<MedicationEntity>>> getTodayMedications(
-    String userId,
-  ) async {
+  Future<Either<Failure, List<MedicationEntity>>> getTodayMedications() async {
     try {
       if (_currentUserId.isEmpty) {
         return Left(AuthenticationFailure(message: 'User not authenticated'));
       }
 
       // Verify user can only access their own medications
-      if (userId != _currentUserId) {
-        return Left(PermissionFailure(message: 'Access denied to medications'));
-      }
-
-      final medications = await remoteDataSource.getTodayMedications(userId);
+      final medications = await remoteDataSource.getTodayMedications(
+        _currentUserId,
+      );
       return Right(medications.cast<MedicationEntity>());
     } on AppException catch (e) {
       return Left(_mapExceptionToFailure(e));
@@ -42,21 +38,13 @@ class DashboardRepositoryImpl implements DashboardRepository {
   }
 
   @override
-  Future<Either<Failure, AdherenceEntity>> getAdherenceStats(
-    String userId, {
+  Future<Either<Failure, AdherenceEntity>> getAdherenceStats({
     DateTime? startDate,
     DateTime? endDate,
   }) async {
     try {
       if (_currentUserId.isEmpty) {
         return Left(AuthenticationFailure(message: 'User not authenticated'));
-      }
-
-      // Verify user can only access their own stats
-      if (userId != _currentUserId) {
-        return Left(
-          PermissionFailure(message: 'Access denied to adherence stats'),
-        );
       }
 
       // Validate date range if provided
@@ -67,7 +55,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
       }
 
       final adherenceStats = await remoteDataSource.getAdherenceStats(
-        userId,
+        _currentUserId,
         startDate: startDate,
         endDate: endDate,
       );
@@ -81,7 +69,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
   }
 
   @override
-  Stream<Either<Failure, AdherenceEntity>> watchAdherenceStats(String userId) {
+  Stream<Either<Failure, AdherenceEntity>> watchAdherenceStats() {
     try {
       if (_currentUserId.isEmpty) {
         return Stream.value(
@@ -89,15 +77,8 @@ class DashboardRepositoryImpl implements DashboardRepository {
         );
       }
 
-      // Verify user can only watch their own stats
-      if (userId != _currentUserId) {
-        return Stream.value(
-          Left(PermissionFailure(message: 'Access denied to adherence stats')),
-        );
-      }
-
       return remoteDataSource
-          .watchAdherenceStats(userId)
+          .watchAdherenceStats(_currentUserId)
           .map<Either<Failure, AdherenceEntity>>(
             (adherenceStats) => Right(adherenceStats),
           )
@@ -116,27 +97,42 @@ class DashboardRepositoryImpl implements DashboardRepository {
     }
   }
 
+  @override
+  Future<Either<Failure, void>> logMedicationTaken(String medicationId) async {
+    try {
+      if (_currentUserId.isEmpty) {
+        return Left(AuthenticationFailure(message: 'User not authenticated'));
+      }
+
+      // TODO: Integrate with adherence logging once available
+      return const Right(null);
+    } on AppException catch (e) {
+      return Left(_mapExceptionToFailure(e));
+    } catch (e) {
+      return Left(DataFailure(message: 'Unexpected error: ${e.toString()}'));
+    }
+  }
+
   /// Map exceptions to failures
   Failure _mapExceptionToFailure(AppException exception) {
-    switch (exception.runtimeType) {
-      case NetworkException:
-        return NetworkFailure(message: exception.message);
-      case ServerException:
-        return ServerFailure(message: exception.message);
-      case AuthenticationException:
-        return AuthenticationFailure(message: exception.message);
-      case PermissionException:
-        return PermissionFailure(message: exception.message);
-      case NotFoundException:
-        return DataFailure(message: exception.message);
-      case ValidationException:
-        return ValidationFailure(message: exception.message);
-      case FirestoreException:
-        return DataFailure(message: exception.message);
-      case DataException:
-        return DataFailure(message: exception.message);
-      default:
-        return DataFailure(message: exception.message);
+    if (exception is NetworkException) {
+      return NetworkFailure(message: exception.message);
+    } else if (exception is ServerException) {
+      return ServerFailure(message: exception.message);
+    } else if (exception is AuthenticationException) {
+      return AuthenticationFailure(message: exception.message);
+    } else if (exception is PermissionException) {
+      return PermissionFailure(message: exception.message);
+    } else if (exception is NotFoundException) {
+      return DataFailure(message: exception.message);
+    } else if (exception is ValidationException) {
+      return ValidationFailure(message: exception.message);
+    } else if (exception is FirestoreException) {
+      return DataFailure(message: exception.message);
+    } else if (exception is DataException) {
+      return DataFailure(message: exception.message);
+    } else {
+      return DataFailure(message: exception.message);
     }
   }
 }

@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/errors/failures.dart';
 import '../entities/adherence_log_entity.dart';
-import '../../dashboard/domain/entities/adherence_entity.dart';
+import 'package:medmind/features/dashboard/domain/entities/adherence_entity.dart';
 
 abstract class AdherenceRepository {
   /// Get adherence logs for a user with optional date range

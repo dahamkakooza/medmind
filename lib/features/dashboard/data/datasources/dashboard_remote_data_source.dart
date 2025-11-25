@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/constants/firebase_constants.dart';
 import '../../../../core/errors/exceptions.dart';
+import 'package:medmind/features/medication/domain/entities/medication_entity.dart';
+import 'package:medmind/features/adherence/domain/entities/adherence_log_entity.dart';
 import '../../../medication/data/models/medication_model.dart';
 import '../../../adherence/data/models/adherence_log_model.dart';
 import '../models/adherence_model.dart';

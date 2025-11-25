@@ -86,8 +86,16 @@ class NotFoundException extends AppException {
 
 class DataException extends AppException {
   const DataException({
-    required String message,
-    required String code,
+    required super.message,
+    required super.code,
     super.stackTrace,
-  }) : super(message: message, code: code);
+  });
+}
+
+class ValidationException extends AppException {
+  const ValidationException({String? message, String? code, super.stackTrace})
+    : super(
+        message: message ?? 'Validation error occurred',
+        code: code ?? 'validation_exception',
+      );
 }

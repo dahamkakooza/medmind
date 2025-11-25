@@ -96,4 +96,22 @@ class AdherenceEntity extends Equatable {
     monthlyStats,
     streakDays,
   ];
+
+  double get weeklyPercentage {
+    if (weeklyStats.isNotEmpty) {
+      return weeklyStats.last.adherenceRate * 100;
+    }
+    return adherenceRate * 100;
+  }
+
+  double get monthlyPercentage {
+    if (monthlyStats.isNotEmpty) {
+      return monthlyStats.last.adherenceRate * 100;
+    }
+    return adherenceRate * 100;
+  }
+
+  int get currentStreak => streakDays;
+
+  int get totalTaken => takenCount;
 }

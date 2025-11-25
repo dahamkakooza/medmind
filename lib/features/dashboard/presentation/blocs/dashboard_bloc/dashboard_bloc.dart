@@ -18,7 +18,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   }) : super(DashboardInitial()) {
     on<LoadDashboardData>(_onLoadDashboardData);
     on<RefreshDashboardData>(_onRefreshDashboardData);
-    on<LogMedicationTaken>(_onLogMedicationTaken);
+    on<LogMedicationTakenEvent>(_onLogMedicationTaken);
   }
 
   Future<void> _onLoadDashboardData(
@@ -37,14 +37,15 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   }
 
   Future<void> _onLogMedicationTaken(
-    LogMedicationTaken event,
+    LogMedicationTakenEvent event,
     Emitter<DashboardState> emit,
   ) async {
     final result = await logMedicationTaken(
       LogMedicationTakenParams(medicationId: event.medicationId),
     );
     result.fold(
-      (failure) => emit(const DashboardError(message: 'Failed to log medication')),
+      (failure) =>
+          emit(const DashboardError(message: 'Failed to log medication')),
       (_) {
         emit(MedicationLoggedSuccess(medicationId: event.medicationId));
         add(RefreshDashboardData());
@@ -64,9 +65,6 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     final medications = medicationsResult.getOrElse(() => []);
     final stats = statsResult.getOrElse(() => throw Exception());
 
-    emit(DashboardLoaded(
-      todayMedications: medications,
-      adherenceStats: stats,
-    ));
+    emit(DashboardLoaded(todayMedications: medications, adherenceStats: stats));
   }
 }

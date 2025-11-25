@@ -94,4 +94,13 @@ class MedicationEntity extends Equatable {
     createdAt,
     updatedAt,
   ];
+
+  /// Convenience getters used by UI layers until adherence tracking integrates
+  bool get enableReminders => times.isNotEmpty;
+
+  TimeOfDay get reminderTime =>
+      times.isNotEmpty ? times.first : const TimeOfDay(hour: 8, minute: 0);
+
+  // Placeholder flag – real implementation should come from adherence logs
+  bool get isTakenToday => false;
 }

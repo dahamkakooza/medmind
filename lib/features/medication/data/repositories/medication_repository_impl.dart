@@ -131,11 +131,14 @@ class MedicationRepositoryImpl implements MedicationRepository {
       // where the actual barcode scanning UI is implemented using mobile_scanner
       // The presentation layer will handle camera permissions and UI
       // This repository method is primarily for validation and error handling
-      
+
       // For now, return an error indicating this should be handled at the UI level
-      return Left(ValidationFailure(
-        message: 'Barcode scanning should be initiated from the presentation layer with proper camera permissions and UI',
-      ));
+      return Left(
+        ValidationFailure(
+          message:
+              'Barcode scanning should be initiated from the presentation layer with proper camera permissions and UI',
+        ),
+      );
     } on AppException catch (e) {
       return Left(_mapExceptionToFailure(e));
     } catch (e) {
@@ -216,25 +219,24 @@ class MedicationRepositoryImpl implements MedicationRepository {
 
   /// Map exceptions to failures
   Failure _mapExceptionToFailure(AppException exception) {
-    switch (exception.runtimeType) {
-      case NetworkException:
-        return NetworkFailure(message: exception.message);
-      case ServerException:
-        return ServerFailure(message: exception.message);
-      case AuthenticationException:
-        return AuthenticationFailure(message: exception.message);
-      case PermissionException:
-        return PermissionFailure(message: exception.message);
-      case NotFoundException:
-        return DataFailure(message: exception.message);
-      case ValidationException:
-        return ValidationFailure(message: exception.message);
-      case FirestoreException:
-        return DataFailure(message: exception.message);
-      case DataException:
-        return DataFailure(message: exception.message);
-      default:
-        return DataFailure(message: exception.message);
+    if (exception is NetworkException) {
+      return NetworkFailure(message: exception.message);
+    } else if (exception is ServerException) {
+      return ServerFailure(message: exception.message);
+    } else if (exception is AuthenticationException) {
+      return AuthenticationFailure(message: exception.message);
+    } else if (exception is PermissionException) {
+      return PermissionFailure(message: exception.message);
+    } else if (exception is NotFoundException) {
+      return DataFailure(message: exception.message);
+    } else if (exception is ValidationException) {
+      return ValidationFailure(message: exception.message);
+    } else if (exception is FirestoreException) {
+      return DataFailure(message: exception.message);
+    } else if (exception is DataException) {
+      return DataFailure(message: exception.message);
+    } else {
+      return DataFailure(message: exception.message);
     }
   }
 }
