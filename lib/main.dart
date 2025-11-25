@@ -24,6 +24,7 @@ import 'features/profile/domain/usecases/get_user_preferences.dart';
 import 'features/profile/domain/usecases/save_user_preferences.dart';
 import 'features/profile/domain/usecases/update_theme_mode.dart';
 import 'features/profile/domain/usecases/update_notifications.dart';
+import 'config/firebase_config.dart';
 
 // Define UserPreferences class
 class UserPreferences {
@@ -54,7 +55,8 @@ class UserPreferences {
     return UserPreferences(
       themeMode: themeMode ?? this.themeMode,
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
-      reminderSnoozeDuration: reminderSnoozeDuration ?? this.reminderSnoozeDuration,
+      reminderSnoozeDuration:
+          reminderSnoozeDuration ?? this.reminderSnoozeDuration,
       language: language ?? this.language,
       biometricAuthEnabled: biometricAuthEnabled ?? this.biometricAuthEnabled,
       dataBackupEnabled: dataBackupEnabled ?? this.dataBackupEnabled,
@@ -65,6 +67,9 @@ class UserPreferences {
 void main() async {
   // Initialize core utilities
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Firebase FIRST
+  await FirebaseConfig.initialize();
 
   // Initialize SharedPreferences
   final sharedPreferences = await SharedPreferences.getInstance();
@@ -86,9 +91,8 @@ class MedMindApp extends StatelessWidget {
       providers: [
         RepositoryProvider(create: (context) => AuthRepositoryImpl()),
         RepositoryProvider(
-          create: (context) => ProfileLocalDataSourceImpl(
-            sharedPreferences: sharedPreferences,
-          ),
+          create: (context) =>
+              ProfileLocalDataSourceImpl(sharedPreferences: sharedPreferences),
         ),
         RepositoryProvider(
           create: (context) => ProfileRepositoryImpl(
@@ -108,12 +112,8 @@ class MedMindApp extends StatelessWidget {
               signInWithGoogle: SignInWithGoogle(
                 context.read<AuthRepositoryImpl>(),
               ),
-              signUp: SignUp(
-                context.read<AuthRepositoryImpl>(),
-              ),
-              signOut: SignOut(
-                context.read<AuthRepositoryImpl>(),
-              ),
+              signUp: SignUp(context.read<AuthRepositoryImpl>()),
+              signOut: SignOut(context.read<AuthRepositoryImpl>()),
             ),
           ),
           BlocProvider(
@@ -171,8 +171,13 @@ class MainNavigationPage extends StatelessWidget {
           Card(
             child: ListTile(
               leading: const Icon(Icons.build, size: 32),
-              title: const Text('Core Utilities Demo', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-              subtitle: const Text('Test DateTime, Input Validation, and Notification utilities'),
+              title: const Text(
+                'Core Utilities Demo',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              ),
+              subtitle: const Text(
+                'Test DateTime, Input Validation, and Notification utilities',
+              ),
               trailing: const Icon(Icons.arrow_forward_ios),
               onTap: () => Navigator.pushNamed(context, '/core-utils-demo'),
             ),
@@ -183,7 +188,10 @@ class MainNavigationPage extends StatelessWidget {
           Card(
             child: ListTile(
               leading: const Icon(Icons.login, size: 32),
-              title: const Text('Authentication Demo', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+              title: const Text(
+                'Authentication Demo',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              ),
               subtitle: const Text('Login, register, and password reset flows'),
               trailing: const Icon(Icons.arrow_forward_ios),
               onTap: () => Navigator.pushNamed(context, '/login'),
@@ -195,8 +203,13 @@ class MainNavigationPage extends StatelessWidget {
           Card(
             child: ListTile(
               leading: const Icon(Icons.settings, size: 32),
-              title: const Text('Profile & Settings', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-              subtitle: const Text('User preferences, theme, notifications, and profile management'),
+              title: const Text(
+                'Profile & Settings',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              ),
+              subtitle: const Text(
+                'User preferences, theme, notifications, and profile management',
+              ),
               trailing: const Icon(Icons.arrow_forward_ios),
               onTap: () => Navigator.pushNamed(context, '/settings'),
             ),
@@ -207,12 +220,17 @@ class MainNavigationPage extends StatelessWidget {
           Card(
             child: ListTile(
               leading: const Icon(Icons.palette, size: 32),
-              title: const Text('Core Widgets Test', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+              title: const Text(
+                'Core Widgets Test',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              ),
               subtitle: const Text('Comprehensive test of all custom widgets'),
               trailing: const Icon(Icons.arrow_forward_ios),
               onTap: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const WidgetsTestPage()),
+                MaterialPageRoute(
+                  builder: (context) => const WidgetsTestPage(),
+                ),
               ),
             ),
           ),
@@ -222,8 +240,13 @@ class MainNavigationPage extends StatelessWidget {
           Card(
             child: ListTile(
               leading: const Icon(Icons.medical_services, size: 32),
-              title: const Text('Loading Widgets Demo', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-              subtitle: const Text('Loading widgets demonstration with theme testing'),
+              title: const Text(
+                'Loading Widgets Demo',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              ),
+              subtitle: const Text(
+                'Loading widgets demonstration with theme testing',
+              ),
               trailing: const Icon(Icons.arrow_forward_ios),
               onTap: () => Navigator.push(
                 context,
@@ -235,20 +258,53 @@ class MainNavigationPage extends StatelessWidget {
           const SizedBox(height: 24),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Text('Frontend Developer 1 - All Tasks Completed:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            child: Text(
+              'Frontend Developer 1 - All Tasks Completed:',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
           ),
           const SizedBox(height: 8),
-          _buildCompletedItem(context, Icons.architecture, 'Core Architecture', 'BLoC, Clean Architecture, Repository Pattern'),
-          _buildCompletedItem(context, Icons.people, 'Authentication System', 'Login, Register, Password Reset, State Management'),
-          _buildCompletedItem(context, Icons.settings, 'Profile Feature', 'User Preferences, Local Storage, Settings UI'),
-          _buildCompletedItem(context, Icons.build, 'Core Utilities', 'DateTime, Input Validation, Notification Utils'),
-          _buildCompletedItem(context, Icons.palette, 'Design System', 'Theming, Custom Widgets, Responsive Design'),
+          _buildCompletedItem(
+            context,
+            Icons.architecture,
+            'Core Architecture',
+            'BLoC, Clean Architecture, Repository Pattern',
+          ),
+          _buildCompletedItem(
+            context,
+            Icons.people,
+            'Authentication System',
+            'Login, Register, Password Reset, State Management',
+          ),
+          _buildCompletedItem(
+            context,
+            Icons.settings,
+            'Profile Feature',
+            'User Preferences, Local Storage, Settings UI',
+          ),
+          _buildCompletedItem(
+            context,
+            Icons.build,
+            'Core Utilities',
+            'DateTime, Input Validation, Notification Utils',
+          ),
+          _buildCompletedItem(
+            context,
+            Icons.palette,
+            'Design System',
+            'Theming, Custom Widgets, Responsive Design',
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildCompletedItem(BuildContext context, IconData icon, String title, String subtitle) {
+  Widget _buildCompletedItem(
+    BuildContext context,
+    IconData icon,
+    String title,
+    String subtitle,
+  ) {
     return ListTile(
       leading: Icon(icon, color: Colors.green),
       title: Text(title),
@@ -282,7 +338,8 @@ class _CoreUtilsDemoPageState extends State<CoreUtilsDemoPage> {
   void _updateDateTimeDemo() {
     final now = DateTime.now();
     setState(() {
-      _dateTimeDemo = '''
+      _dateTimeDemo =
+          '''
 Current Time: ${DateTimeUtils.formatTime(now)}
 Current Date: ${DateTimeUtils.formatDate(now)}
 Full DateTime: ${DateTimeUtils.formatDateTime(now)}
@@ -298,11 +355,14 @@ Age Calculation: ${DateTimeUtils.calculateAge(DateTime(1990, 1, 1))} years
     final inputConverter = InputConverter();
 
     final emailResult = inputConverter.validateEmail(_emailController.text);
-    final passwordResult = inputConverter.validatePassword(_passwordController.text);
+    final passwordResult = inputConverter.validatePassword(
+      _passwordController.text,
+    );
     final nameResult = inputConverter.validateName(_nameController.text);
 
     setState(() {
-      _validationResult = '''
+      _validationResult =
+          '''
 Email Validation: ${emailResult.fold((l) => '❌ ${l.message}', (r) => '✅ Valid')}
 Password Validation: ${passwordResult.fold((l) => '❌ ${l.message}', (r) => '✅ Valid')}
 Name Validation: ${nameResult.fold((l) => '❌ ${l.message}', (r) => '✅ Valid')}
@@ -345,9 +405,18 @@ Name Validation: ${nameResult.fold((l) => '❌ ${l.message}', (r) => '✅ Valid'
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('📅 DateTime Utilities', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                    const Text(
+                      '📅 DateTime Utilities',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                     const SizedBox(height: 12),
-                    Text(_dateTimeDemo, style: const TextStyle(fontFamily: 'monospace')),
+                    Text(
+                      _dateTimeDemo,
+                      style: const TextStyle(fontFamily: 'monospace'),
+                    ),
                     const SizedBox(height: 12),
                     ElevatedButton(
                       onPressed: _updateDateTimeDemo,
@@ -367,7 +436,13 @@ Name Validation: ${nameResult.fold((l) => '❌ ${l.message}', (r) => '✅ Valid'
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('✅ Input Validation', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                    const Text(
+                      '✅ Input Validation',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                     const SizedBox(height: 12),
                     TextField(
                       controller: _emailController,
@@ -400,7 +475,10 @@ Name Validation: ${nameResult.fold((l) => '❌ ${l.message}', (r) => '✅ Valid'
                     ),
                     const SizedBox(height: 12),
                     if (_validationResult.isNotEmpty)
-                      Text(_validationResult, style: const TextStyle(fontFamily: 'monospace')),
+                      Text(
+                        _validationResult,
+                        style: const TextStyle(fontFamily: 'monospace'),
+                      ),
                   ],
                 ),
               ),
@@ -415,9 +493,17 @@ Name Validation: ${nameResult.fold((l) => '❌ ${l.message}', (r) => '✅ Valid'
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('🔔 Notification Utilities', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                    const Text(
+                      '🔔 Notification Utilities',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                     const SizedBox(height: 12),
-                    const Text('Test instant notifications and permission requests'),
+                    const Text(
+                      'Test instant notifications and permission requests',
+                    ),
                     const SizedBox(height: 12),
                     Row(
                       children: [
@@ -448,7 +534,13 @@ Name Validation: ${nameResult.fold((l) => '❌ ${l.message}', (r) => '✅ Valid'
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('⚙️ App Constants', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                    const Text(
+                      '⚙️ App Constants',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                     const SizedBox(height: 12),
                     Text('''
 App Name: ${AppConstants.appName}
@@ -575,7 +667,10 @@ class SettingsPage extends StatelessWidget {
                 icon: Icons.notifications,
                 title: 'Enable Notifications',
                 value: preferences.notificationsEnabled,
-                onChanged: (value) => _showSnackBar(context, 'Notifications ${value ? 'enabled' : 'disabled'}'),
+                onChanged: (value) => _showSnackBar(
+                  context,
+                  'Notifications ${value ? 'enabled' : 'disabled'}',
+                ),
               ),
               _buildDivider(),
               _buildSettingItem(
@@ -583,7 +678,10 @@ class SettingsPage extends StatelessWidget {
                 icon: Icons.snooze,
                 title: 'Snooze Duration',
                 subtitle: '${preferences.reminderSnoozeDuration} minutes',
-                onTap: () => _showSnoozeDurationSelector(context, preferences.reminderSnoozeDuration),
+                onTap: () => _showSnoozeDurationSelector(
+                  context,
+                  preferences.reminderSnoozeDuration,
+                ),
               ),
             ],
           ),
@@ -615,7 +713,10 @@ class SettingsPage extends StatelessWidget {
                 icon: Icons.fingerprint,
                 title: 'Biometric Authentication',
                 value: preferences.biometricAuthEnabled,
-                onChanged: (value) => _showSnackBar(context, 'Biometric auth ${value ? 'enabled' : 'disabled'}'),
+                onChanged: (value) => _showSnackBar(
+                  context,
+                  'Biometric auth ${value ? 'enabled' : 'disabled'}',
+                ),
               ),
             ],
           ),
@@ -631,7 +732,10 @@ class SettingsPage extends StatelessWidget {
                 icon: Icons.backup,
                 title: 'Automatic Backup',
                 value: preferences.dataBackupEnabled,
-                onChanged: (value) => _showSnackBar(context, 'Auto backup ${value ? 'enabled' : 'disabled'}'),
+                onChanged: (value) => _showSnackBar(
+                  context,
+                  'Auto backup ${value ? 'enabled' : 'disabled'}',
+                ),
               ),
               _buildDivider(),
               _buildSettingItem(
@@ -639,7 +743,8 @@ class SettingsPage extends StatelessWidget {
                 icon: Icons.upload,
                 title: 'Export Data',
                 subtitle: 'Download your medication data',
-                onTap: () => _showSnackBar(context, 'Export data functionality'),
+                onTap: () =>
+                    _showSnackBar(context, 'Export data functionality'),
               ),
               _buildDivider(),
               _buildSettingItem(
@@ -660,9 +765,9 @@ class SettingsPage extends StatelessWidget {
   }
 
   void _showSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   Widget _buildSectionHeader(String title) {
@@ -670,21 +775,18 @@ class SettingsPage extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Text(
         title,
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-        ),
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
       ),
     );
   }
 
   Widget _buildSettingItem(
-      BuildContext context, {
-        required IconData icon,
-        required String title,
-        required String subtitle,
-        required VoidCallback onTap,
-      }) {
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
     return ListTile(
       leading: Icon(icon),
       title: Text(title),
@@ -695,19 +797,16 @@ class SettingsPage extends StatelessWidget {
   }
 
   Widget _buildSwitchSetting(
-      BuildContext context, {
-        required IconData icon,
-        required String title,
-        required bool value,
-        required Function(bool) onChanged,
-      }) {
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required bool value,
+    required Function(bool) onChanged,
+  }) {
     return ListTile(
       leading: Icon(icon),
       title: Text(title),
-      trailing: Switch(
-        value: value,
-        onChanged: onChanged,
-      ),
+      trailing: Switch(value: value, onChanged: onChanged),
     );
   }
 
@@ -820,10 +919,15 @@ class SettingsPage extends StatelessWidget {
           children: [5, 10, 15, 30].map((duration) {
             return ListTile(
               title: Text('$duration minutes'),
-              trailing: currentDuration == duration ? const Icon(Icons.check) : null,
+              trailing: currentDuration == duration
+                  ? const Icon(Icons.check)
+                  : null,
               onTap: () {
                 Navigator.pop(context);
-                _showSnackBar(context, 'Snooze duration set to $duration minutes');
+                _showSnackBar(
+                  context,
+                  'Snooze duration set to $duration minutes',
+                );
               },
             );
           }).toList(),
@@ -837,7 +941,9 @@ class SettingsPage extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Reset Settings'),
-        content: const Text('Are you sure you want to reset all settings to their default values?'),
+        content: const Text(
+          'Are you sure you want to reset all settings to their default values?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -892,9 +998,7 @@ class _ThemeTestPageState extends State<ThemeTestPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('MedMind - Loading Widgets Test'),
-      ),
+      appBar: AppBar(title: const Text('MedMind - Loading Widgets Test')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -904,7 +1008,10 @@ class _ThemeTestPageState extends State<ThemeTestPage> {
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   children: [
-                    Text('Theme Test', style: Theme.of(context).textTheme.headlineSmall),
+                    Text(
+                      'Theme Test',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
                     const SizedBox(height: 16),
                     Container(
                       height: 50,
@@ -912,7 +1019,9 @@ class _ThemeTestPageState extends State<ThemeTestPage> {
                       child: Center(
                         child: Text(
                           'Primary Color',
-                          style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
                         ),
                       ),
                     ),
@@ -926,7 +1035,10 @@ class _ThemeTestPageState extends State<ThemeTestPage> {
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   children: [
-                    Text('Loading Widget', style: Theme.of(context).textTheme.headlineSmall),
+                    Text(
+                      'Loading Widget',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
                     const SizedBox(height: 16),
                     const LoadingWidget(message: 'Loading medications...'),
                   ],
@@ -939,7 +1051,10 @@ class _ThemeTestPageState extends State<ThemeTestPage> {
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   children: [
-                    Text('Loading Button', style: Theme.of(context).textTheme.headlineSmall),
+                    Text(
+                      'Loading Button',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () {
@@ -952,13 +1067,15 @@ class _ThemeTestPageState extends State<ThemeTestPage> {
                       },
                       child: _isLoading
                           ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                        ),
-                      )
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            )
                           : const Text('Simulate Loading'),
                     ),
                   ],
