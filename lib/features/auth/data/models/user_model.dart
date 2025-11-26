@@ -26,10 +26,22 @@ class UserModel extends Equatable {
       displayName: json['displayName'] as String?,
       photoURL: json['photoURL'] as String?,
       dateJoined: DateTime.parse(json['dateJoined'] as String),
-      lastLogin: json['lastLogin'] != null 
+      lastLogin: json['lastLogin'] != null
           ? DateTime.parse(json['lastLogin'] as String)
           : null,
       emailVerified: json['emailVerified'] as bool? ?? false,
+    );
+  }
+
+  factory UserModel.fromFirebaseUser(dynamic user) {
+    return UserModel(
+      id: user.uid,
+      email: user.email ?? '',
+      displayName: user.displayName,
+      photoURL: user.photoURL,
+      dateJoined: user.metadata.creationTime ?? DateTime.now(),
+      lastLogin: user.metadata.lastSignInTime,
+      emailVerified: user.emailVerified,
     );
   }
 
@@ -65,7 +77,7 @@ class UserModel extends Equatable {
     );
   }
 
-  static const empty = UserModel(
+  static final empty = UserModel(
     id: '',
     email: '',
     dateJoined: DateTime(0),

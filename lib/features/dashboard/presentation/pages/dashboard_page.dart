@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../blocs/dashboard_bloc/dashboard_bloc.dart';
-import '../blocs/dashboard_bloc/dashboard_event.dart';
-import '../blocs/dashboard_bloc/dashboard_state.dart';
 import '../widgets/today_medications_widget.dart';
 import '../widgets/adherence_stats_widget.dart';
 import '../widgets/quick_actions_widget.dart';
+import '../blocs/dashboard_bloc/dashboard_bloc.dart';
+import '../blocs/dashboard_bloc/dashboard_event.dart';
+import '../blocs/dashboard_bloc/dashboard_state.dart';
 import '../../../../core/widgets/loading_widget.dart';
 import '../../../../core/widgets/error_widget.dart';
 
@@ -59,14 +59,14 @@ class _DashboardPageState extends State<DashboardPage> {
           if (state is DashboardLoading) {
             return const LoadingWidget();
           }
-          
+
           if (state is DashboardError) {
             return ErrorDisplayWidget(
               message: state.message,
               onRetry: _loadDashboardData,
             );
           }
-          
+
           if (state is DashboardLoaded) {
             return RefreshIndicator(
               onRefresh: () async => _loadDashboardData(),
@@ -78,12 +78,15 @@ class _DashboardPageState extends State<DashboardPage> {
                   children: [
                     // Quick Actions
                     QuickActionsWidget(
-                      onAddMedication: () => Navigator.pushNamed(context, '/add-medication'),
-                      onViewMedications: () => Navigator.pushNamed(context, '/medications'),
-                      onViewHistory: () => Navigator.pushNamed(context, '/adherence-history'),
+                      onAddMedication: () =>
+                          Navigator.pushNamed(context, '/add-medication'),
+                      onViewMedications: () =>
+                          Navigator.pushNamed(context, '/medications'),
+                      onViewHistory: () =>
+                          Navigator.pushNamed(context, '/adherence-history'),
                     ),
                     const SizedBox(height: 24),
-                    
+
                     // Today's Medications
                     Text(
                       'Today\'s Medications',
@@ -96,12 +99,12 @@ class _DashboardPageState extends State<DashboardPage> {
                       medications: state.todayMedications,
                       onMedicationTaken: (medication) {
                         context.read<DashboardBloc>().add(
-                          LogMedicationTaken(medicationId: medication.id),
+                          LogMedicationTakenEvent(medicationId: medication.id),
                         );
                       },
                     ),
                     const SizedBox(height: 24),
-                    
+
                     // Adherence Stats
                     Text(
                       'Your Progress',
@@ -112,14 +115,15 @@ class _DashboardPageState extends State<DashboardPage> {
                     const SizedBox(height: 12),
                     AdherenceStatsWidget(
                       adherenceStats: state.adherenceStats,
-                      onViewDetails: () => Navigator.pushNamed(context, '/adherence-analytics'),
+                      onViewDetails: () =>
+                          Navigator.pushNamed(context, '/adherence-analytics'),
                     ),
                   ],
                 ),
               ),
             );
           }
-          
+
           return const SizedBox.shrink();
         },
       ),

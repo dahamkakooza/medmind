@@ -3,10 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/medication_bloc/medication_bloc.dart';
 import '../blocs/medication_bloc/medication_event.dart';
 import '../blocs/medication_bloc/medication_state.dart';
-import '../blocs/barcode_bloc/barcode_bloc.dart';
-import '../blocs/barcode_bloc/barcode_event.dart';
-import '../blocs/barcode_bloc/barcode_state.dart';
-import '../widgets/medication_form.dart';
+// TODO: Implement BarcodeBloc
+// import '../blocs/barcode_bloc/barcode_bloc.dart';
+// import '../blocs/barcode_bloc/barcode_event.dart';
+// import '../blocs/barcode_bloc/barcode_state.dart';
+import '../widgets/medication_form.dart' as widgets;
 import '../widgets/barcode_scanner.dart';
 import '../../domain/entities/medication_entity.dart';
 
@@ -22,7 +23,7 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
   final _nameController = TextEditingController();
   final _dosageController = TextEditingController();
   final _instructionsController = TextEditingController();
-  
+
   String _frequency = 'Once daily';
   TimeOfDay _reminderTime = const TimeOfDay(hour: 8, minute: 0);
   bool _enableReminders = true;
@@ -39,27 +40,32 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (context) => BlocProvider.value(
-        value: context.read<BarcodeBloc>(),
-        child: const BarcodeScanner(),
-      ),
+      builder: (context) => const BarcodeScanner(),
     );
   }
 
   void _saveMedication() {
     if (_formKey.currentState!.validate()) {
+      final now = DateTime.now();
       final medication = MedicationEntity(
         id: '',
+        userId: '', // Will be set by repository
         name: _nameController.text.trim(),
         dosage: _dosageController.text.trim(),
-        frequency: _frequency,
+        form: MedicationForm.tablet, // Default form
+        frequency: MedicationFrequency.daily, // Default frequency
+        times: _enableReminders ? [_reminderTime] : [],
+        days: [], // Empty for daily
+        startDate: now,
+        isActive: true,
         instructions: _instructionsController.text.trim(),
-        reminderTime: _reminderTime,
-        enableReminders: _enableReminders,
-        createdAt: DateTime.now(),
+        createdAt: now,
+        updatedAt: now,
       );
 
-      context.read<MedicationBloc>().add(AddMedicationRequested(medication: medication));
+      context.read<MedicationBloc>().add(
+        AddMedicationRequested(medication: medication),
+      );
     }
   }
 
@@ -82,26 +88,21 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
               if (state is MedicationAdded) {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Medication added successfully')),
+                  const SnackBar(
+                    content: Text('Medication added successfully'),
+                  ),
                 );
               }
               if (state is MedicationError) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(state.message)),
-                );
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(state.message)));
               }
             },
           ),
-          BlocListener<BarcodeBloc, BarcodeState>(
-            listener: (context, state) {
-              if (state is BarcodeScanned) {
-                _nameController.text = state.medicationName;
-                Navigator.pop(context);
-              }
-            },
-          ),
+          // TODO: Add BarcodeBloc listener when BarcodeBloc is implemented
         ],
-        child: MedicationForm(
+        child: widgets.MedicationForm(
           formKey: _formKey,
           nameController: _nameController,
           dosageController: _dosageController,
@@ -111,7 +112,8 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
           enableReminders: _enableReminders,
           onFrequencyChanged: (value) => setState(() => _frequency = value!),
           onReminderTimeChanged: (time) => setState(() => _reminderTime = time),
-          onEnableRemindersChanged: (value) => setState(() => _enableReminders = value),
+          onEnableRemindersChanged: (value) =>
+              setState(() => _enableReminders = value),
           onSave: _saveMedication,
         ),
       ),

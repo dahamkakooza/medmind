@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
-import '../../domain/entities/adherence_log_entity.dart';
-import '../widgets/adherence_chart.dart';
+import '../../../domain/entities/adherence_log_entity.dart';
+import '../../widgets/adherence_chart.dart';
 
 abstract class AdherenceState extends Equatable {
   const AdherenceState();
@@ -60,10 +60,7 @@ class AdherenceDataExported extends AdherenceState {
   final String filePath;
   final String format;
 
-  const AdherenceDataExported({
-    required this.filePath,
-    required this.format,
-  });
+  const AdherenceDataExported({required this.filePath, required this.format});
 
   @override
   List<Object> get props => [filePath, format];

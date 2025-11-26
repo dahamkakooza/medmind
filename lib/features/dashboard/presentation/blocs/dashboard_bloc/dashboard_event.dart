@@ -11,10 +11,10 @@ class LoadDashboardData extends DashboardEvent {}
 
 class RefreshDashboardData extends DashboardEvent {}
 
-class LogMedicationTaken extends DashboardEvent {
+class LogMedicationTakenEvent extends DashboardEvent {
   final String medicationId;
 
-  const LogMedicationTaken({required this.medicationId});
+  const LogMedicationTakenEvent({required this.medicationId});
 
   @override
   List<Object> get props => [medicationId];

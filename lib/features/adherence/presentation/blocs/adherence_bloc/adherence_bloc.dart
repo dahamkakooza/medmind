@@ -1,10 +1,11 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../../domain/usecases/get_adherence_logs.dart';
 import '../../../domain/usecases/get_adherence_summary.dart';
 import '../../../domain/usecases/log_medication_taken.dart';
 import '../../../domain/usecases/export_adherence_data.dart';
 import '../../../../../core/usecases/usecase.dart';
-import '../widgets/adherence_chart.dart';
+import '../../widgets/adherence_chart.dart';
 import 'adherence_event.dart';
 import 'adherence_state.dart';
 
@@ -31,12 +32,17 @@ class AdherenceBloc extends Bloc<AdherenceEvent, AdherenceState> {
     Emitter<AdherenceState> emit,
   ) async {
     emit(AdherenceLoading());
-    final result = await getAdherenceLogs(GetAdherenceLogsParams(
-      startDate: event.startDate,
-      endDate: event.endDate,
-    ));
+    final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+    final result = await getAdherenceLogs(
+      GetAdherenceLogsParams(
+        userId: userId,
+        startDate: event.startDate,
+        endDate: event.endDate,
+      ),
+    );
     result.fold(
-      (failure) => emit(const AdherenceError(message: 'Failed to load adherence logs')),
+      (failure) =>
+          emit(const AdherenceError(message: 'Failed to load adherence logs')),
       (logs) => emit(AdherenceLogsLoaded(logs: logs)),
     );
   }
@@ -46,16 +52,29 @@ class AdherenceBloc extends Bloc<AdherenceEvent, AdherenceState> {
     Emitter<AdherenceState> emit,
   ) async {
     emit(AdherenceLoading());
-    final result = await getAdherenceSummary(NoParams());
+    final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+    final now = DateTime.now();
+    final startDate = now.subtract(const Duration(days: 30)); // Last 30 days
+    final result = await getAdherenceSummary(
+      GetAdherenceSummaryParams(
+        userId: userId,
+        startDate: startDate,
+        endDate: now,
+      ),
+    );
     result.fold(
-      (failure) => emit(const AdherenceError(message: 'Failed to load adherence summary')),
-      (summary) => emit(AdherenceSummaryLoaded(
-        overallAdherence: summary['overallAdherence'] ?? 0.0,
-        currentStreak: summary['currentStreak'] ?? 0,
-        bestStreak: summary['bestStreak'] ?? 0,
-        missedDoses: summary['missedDoses'] ?? 0,
-        chartData: _generateChartData(),
-      )),
+      (failure) => emit(
+        const AdherenceError(message: 'Failed to load adherence summary'),
+      ),
+      (summary) => emit(
+        AdherenceSummaryLoaded(
+          overallAdherence: summary['overallAdherence'] ?? 0.0,
+          currentStreak: summary['currentStreak'] ?? 0,
+          bestStreak: summary['bestStreak'] ?? 0,
+          missedDoses: summary['missedDoses'] ?? 0,
+          chartData: _generateChartData(),
+        ),
+      ),
     );
   }
 
@@ -63,13 +82,18 @@ class AdherenceBloc extends Bloc<AdherenceEvent, AdherenceState> {
     LogMedicationTakenRequested event,
     Emitter<AdherenceState> emit,
   ) async {
-    final result = await logMedicationTaken(LogMedicationTakenParams(
-      medicationId: event.medicationId,
-      takenAt: event.takenAt,
-      notes: event.notes,
-    ));
+    final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+    final result = await logMedicationTaken(
+      LogMedicationTakenParams(
+        userId: userId,
+        medicationId: event.medicationId,
+        takenAt: event.takenAt,
+        notes: event.notes,
+      ),
+    );
     result.fold(
-      (failure) => emit(const AdherenceError(message: 'Failed to log medication')),
+      (failure) =>
+          emit(const AdherenceError(message: 'Failed to log medication')),
       (log) => emit(MedicationLoggedSuccess(log: log)),
     );
   }
@@ -78,13 +102,13 @@ class AdherenceBloc extends Bloc<AdherenceEvent, AdherenceState> {
     ExportAdherenceDataRequested event,
     Emitter<AdherenceState> emit,
   ) async {
-    final result = await exportAdherenceData(ExportAdherenceDataParams(format: event.format));
+    final result = await exportAdherenceData(
+      ExportAdherenceDataParams(format: event.format),
+    );
     result.fold(
       (failure) => emit(const AdherenceError(message: 'Failed to export data')),
-      (filePath) => emit(AdherenceDataExported(
-        filePath: filePath,
-        format: event.format,
-      )),
+      (filePath) =>
+          emit(AdherenceDataExported(filePath: filePath, format: event.format)),
     );
   }
 
