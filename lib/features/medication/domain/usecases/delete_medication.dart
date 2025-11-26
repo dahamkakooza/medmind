@@ -2,7 +2,9 @@ import 'package:dartz/dartz.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../repositories/medication_repository.dart';
+import 'package:injectable/injectable.dart';
 
+@injectable
 class DeleteMedication implements UseCase<void, DeleteMedicationParams> {
   final MedicationRepository repository;
 

@@ -1,12 +1,14 @@
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/errors/exceptions.dart';
+import 'package:injectable/injectable.dart';
 import '../../../../core/errors/failures.dart';
 import '../../domain/entities/medication_entity.dart';
 import '../../domain/repositories/medication_repository.dart';
 import '../datasources/medication_remote_data_source.dart';
 import '../models/medication_model.dart';
 
+@LazySingleton(as: MedicationRepository) // ADD THIS
 class MedicationRepositoryImpl implements MedicationRepository {
   final MedicationRemoteDataSource remoteDataSource;
   final FirebaseAuth firebaseAuth;
@@ -21,8 +23,15 @@ class MedicationRepositoryImpl implements MedicationRepository {
   @override
   Future<Either<Failure, List<MedicationEntity>>> getMedications() async {
     try {
-      if (_currentUserId.isEmpty) {
-        return Left(AuthenticationFailure(message: 'User not authenticated'));
+      final medications = await remoteDataSource.getMedications();
+      await localDataSource.cacheMedications(medications);
+      return Right(medications);
+    } catch (e) {
+      try {
+        final cachedMedications = await localDataSource.getCachedMedications();
+        return Right(cachedMedications);
+      } catch (e) {
+        return Left(ServerFailure(message: '', code: ''));
       }
 
       final medications = await remoteDataSource.getMedications(_currentUserId);

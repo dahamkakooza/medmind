@@ -1,9 +1,11 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../domain/usecases/scan_barcode.dart';
 import '../../../../../core/usecases/usecase.dart';
+import 'package:injectable/injectable.dart';
 import 'barcode_event.dart';
 import 'barcode_state.dart';
 
+@injectable
 class BarcodeBloc extends Bloc<BarcodeEvent, BarcodeState> {
   final ScanBarcode scanBarcode;
 

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/constants/firebase_constants.dart';
 import '../../../../core/errors/exceptions.dart';
+import 'package:injectable/injectable.dart';
 import '../models/medication_model.dart';
 
 abstract class MedicationRemoteDataSource {
@@ -14,6 +15,7 @@ abstract class MedicationRemoteDataSource {
   Stream<List<MedicationModel>> watchMedications(String userId);
 }
 
+@LazySingleton(as: MedicationRemoteDataSource) // ADD THIS
 class MedicationRemoteDataSourceImpl implements MedicationRemoteDataSource {
   final FirebaseFirestore firestore;
   final FirebaseAuth firebaseAuth;

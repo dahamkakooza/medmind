@@ -1,11 +1,12 @@
 import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../entities/adherence_log_entity.dart';
 import '../repositories/adherence_repository.dart';
 
-class LogMedicationTaken
-    implements UseCase<AdherenceLogEntity, LogMedicationTakenParams> {
+@injectable
+class LogMedicationTaken implements UseCase<AdherenceLogEntity, LogMedicationTakenParams> {
   final AdherenceRepository repository;
 
   LogMedicationTaken(this.repository);

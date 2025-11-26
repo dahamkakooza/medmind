@@ -1,14 +1,18 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
+import '../../../../../core/usecases/usecase.dart';
+import '../../../../../core/errors/failures.dart';
+import '../../../domain/usecases/export_adherence_data.dart';
 import '../../../domain/usecases/get_adherence_logs.dart';
 import '../../../domain/usecases/get_adherence_summary.dart';
 import '../../../domain/usecases/log_medication_taken.dart';
-import '../../../domain/usecases/export_adherence_data.dart';
-import '../../../../../core/usecases/usecase.dart';
+import '../../domain/entities/adherence_log_entity.dart';
 import '../../widgets/adherence_chart.dart';
 import 'adherence_event.dart';
 import 'adherence_state.dart';
 
+@injectable
 class AdherenceBloc extends Bloc<AdherenceEvent, AdherenceState> {
   final GetAdherenceLogs getAdherenceLogs;
   final GetAdherenceSummary getAdherenceSummary;
@@ -29,9 +33,9 @@ class AdherenceBloc extends Bloc<AdherenceEvent, AdherenceState> {
   }
 
   Future<void> _onGetAdherenceLogsRequested(
-    GetAdherenceLogsRequested event,
-    Emitter<AdherenceState> emit,
-  ) async {
+      GetAdherenceLogsRequested event,
+      Emitter<AdherenceState> emit,
+      ) async {
     emit(AdherenceLoading());
     final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
     final result = await getAdherenceLogs(
@@ -49,9 +53,9 @@ class AdherenceBloc extends Bloc<AdherenceEvent, AdherenceState> {
   }
 
   Future<void> _onGetAdherenceSummaryRequested(
-    GetAdherenceSummaryRequested event,
-    Emitter<AdherenceState> emit,
-  ) async {
+      GetAdherenceSummaryRequested event,
+      Emitter<AdherenceState> emit,
+      ) async {
     emit(AdherenceLoading());
     final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
     final now = DateTime.now();
@@ -143,7 +147,6 @@ class AdherenceBloc extends Bloc<AdherenceEvent, AdherenceState> {
   }
 
   List<ChartData> _generateChartData() {
-    // Generate sample chart data
     return List.generate(7, (index) {
       return ChartData(
         label: 'Day ${index + 1}',

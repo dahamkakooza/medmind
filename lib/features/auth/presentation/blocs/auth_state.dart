@@ -1,3 +1,4 @@
+
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/user_entity.dart';
 
@@ -21,6 +22,8 @@ class SignUpLoading extends AuthState {}
 class GoogleSignInLoading extends AuthState {}
 
 class PasswordResetLoading extends AuthState {}
+
+class EmailVerificationLoading extends AuthState {} // ADDED THIS
 
 // Success States
 class Authenticated extends AuthState {

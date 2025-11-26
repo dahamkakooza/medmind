@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class UserModel extends Equatable {
   final String id;
@@ -97,4 +98,16 @@ class UserModel extends Equatable {
     lastLogin,
     emailVerified,
   ];
+
+  factory UserModel.fromFirebaseUser(User user) {
+    return UserModel(
+      id: user.uid,
+      email: user.email ?? '',
+      displayName: user.displayName,
+      photoURL: user.photoURL,
+      dateJoined: user.metadata.creationTime ?? DateTime.now(),
+      lastLogin: user.metadata.lastSignInTime,
+      emailVerified: user.emailVerified,
+    );
+  }
 }

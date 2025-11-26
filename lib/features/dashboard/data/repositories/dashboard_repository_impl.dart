@@ -1,12 +1,15 @@
+
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/errors/exceptions.dart';
+import 'package:injectable/injectable.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../medication/domain/entities/medication_entity.dart';
 import '../../domain/entities/adherence_entity.dart';
 import '../../domain/repositories/dashboard_repository.dart';
 import '../datasources/dashboard_remote_data_source.dart';
 
+@LazySingleton(as: DashboardRepository) // ADD THIS
 class DashboardRepositoryImpl implements DashboardRepository {
   final DashboardRemoteDataSource remoteDataSource;
   final FirebaseAuth firebaseAuth;
