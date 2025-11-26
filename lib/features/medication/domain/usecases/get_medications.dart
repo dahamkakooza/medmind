@@ -3,7 +3,9 @@ import '../../../../core/errors/failures.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../entities/medication_entity.dart';
 import '../repositories/medication_repository.dart';
+import 'package:injectable/injectable.dart';
 
+@injectable
 class GetMedications implements UseCase<List<MedicationEntity>, NoParams> {
   final MedicationRepository repository;
 

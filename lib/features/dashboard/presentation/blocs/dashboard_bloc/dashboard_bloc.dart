@@ -1,15 +1,19 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:dartz/dartz.dart';
+import '../../../../../core/usecases/usecase.dart';
+import '../../../../../core/errors/failures.dart';
 import '../../../domain/usecases/get_today_medications.dart';
 import '../../../domain/usecases/get_adherence_stats.dart';
-import '../../../domain/usecases/log_medication_taken.dart';
-import '../../../../../core/usecases/usecase.dart';
+import '../../../../adherence/domain/usecases/log_medication_taken.dart' as adherence_log;
+import 'package:injectable/injectable.dart';
 import 'dashboard_event.dart';
 import 'dashboard_state.dart';
 
+@injectable
 class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   final GetTodayMedications getTodayMedications;
   final GetAdherenceStats getAdherenceStats;
-  final LogMedicationTaken logMedicationTaken;
+  final adherence_log.LogMedicationTaken logMedicationTaken;
 
   DashboardBloc({
     required this.getTodayMedications,
@@ -22,30 +26,33 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   }
 
   Future<void> _onLoadDashboardData(
-    LoadDashboardData event,
-    Emitter<DashboardState> emit,
-  ) async {
+      LoadDashboardData event,
+      Emitter<DashboardState> emit,
+      ) async {
     emit(DashboardLoading());
     await _loadData(emit);
   }
 
   Future<void> _onRefreshDashboardData(
-    RefreshDashboardData event,
-    Emitter<DashboardState> emit,
-  ) async {
+      RefreshDashboardData event,
+      Emitter<DashboardState> emit,
+      ) async {
     await _loadData(emit);
   }
 
   Future<void> _onLogMedicationTaken(
-    LogMedicationTaken event,
-    Emitter<DashboardState> emit,
-  ) async {
+      LogMedicationTaken event,
+      Emitter<DashboardState> emit,
+      ) async {
     final result = await logMedicationTaken(
-      LogMedicationTakenParams(medicationId: event.medicationId),
+      adherence_log.LogMedicationTakenParams(
+        medicationId: event.medicationId,
+        takenAt: DateTime.now(),
+      ),
     );
     result.fold(
-      (failure) => emit(const DashboardError(message: 'Failed to log medication')),
-      (_) {
+          (failure) => emit(DashboardError(message: _mapFailureToMessage(failure))),
+          (_) {
         emit(MedicationLoggedSuccess(medicationId: event.medicationId));
         add(RefreshDashboardData());
       },
@@ -56,17 +63,30 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     final medicationsResult = await getTodayMedications(NoParams());
     final statsResult = await getAdherenceStats(NoParams());
 
-    if (medicationsResult.isLeft() || statsResult.isLeft()) {
-      emit(const DashboardError(message: 'Failed to load dashboard data'));
-      return;
+    medicationsResult.fold(
+          (failure) => emit(DashboardError(message: _mapFailureToMessage(failure))),
+          (medications) {
+        statsResult.fold(
+              (failure) => emit(DashboardError(message: _mapFailureToMessage(failure))),
+              (stats) => emit(DashboardLoaded(
+            todayMedications: medications,
+            adherenceStats: stats,
+          )),
+        );
+      },
+    );
+  }
+
+  String _mapFailureToMessage(Failure failure) {
+    switch (failure.runtimeType) {
+      case ServerFailure:
+        return 'Server error occurred';
+      case NetworkFailure:
+        return 'No internet connection';
+      case CacheFailure:
+        return 'Cache error occurred';
+      default:
+        return 'An unexpected error occurred';
     }
-
-    final medications = medicationsResult.getOrElse(() => []);
-    final stats = statsResult.getOrElse(() => throw Exception());
-
-    emit(DashboardLoaded(
-      todayMedications: medications,
-      adherenceStats: stats,
-    ));
   }
 }

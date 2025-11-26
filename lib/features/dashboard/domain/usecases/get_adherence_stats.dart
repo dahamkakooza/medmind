@@ -3,7 +3,9 @@ import '../../../../core/errors/failures.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../entities/adherence_entity.dart';
 import '../repositories/dashboard_repository.dart';
+import 'package:injectable/injectable.dart';
 
+@injectable
 class GetAdherenceStats implements UseCase<AdherenceEntity, NoParams> {
   final DashboardRepository repository;
 

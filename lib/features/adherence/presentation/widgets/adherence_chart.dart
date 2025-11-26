@@ -1,4 +1,20 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+
+class ChartData extends Equatable {
+  final String label;
+  final double percentage;
+  final DateTime date;
+
+  const ChartData({
+    required this.label,
+    required this.percentage,
+    required this.date,
+  });
+
+  @override
+  List<Object> get props => [label, percentage, date];
+}
 
 class AdherenceChart extends StatelessWidget {
   final String period;
@@ -36,15 +52,15 @@ class AdherenceChart extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 20),
-            
+
             // Chart area
             SizedBox(
               height: 200,
               child: _buildChart(context),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Legend
             _buildLegend(context),
           ],
@@ -171,7 +187,7 @@ class AdherenceChartPainter extends CustomPainter {
       final textPainter = TextPainter(
         text: TextSpan(
           text: '${data[i].percentage.toInt()}%',
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.black87,
             fontSize: 10,
             fontWeight: FontWeight.w500,
@@ -198,16 +214,4 @@ class AdherenceChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-}
-
-class ChartData {
-  final String label;
-  final double percentage;
-  final DateTime date;
-
-  ChartData({
-    required this.label,
-    required this.percentage,
-    required this.date,
-  });
 }

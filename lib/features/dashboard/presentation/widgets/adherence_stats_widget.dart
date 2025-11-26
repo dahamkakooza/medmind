@@ -48,7 +48,7 @@ class AdherenceStatsWidget extends StatelessWidget {
                     context,
                     'This Week',
                     '${adherenceStats.weeklyPercentage.toStringAsFixed(0)}%',
-                    Icons.calendar_week,
+                    Icons.calendar_today,
                     _getAdherenceColor(adherenceStats.weeklyPercentage),
                   ),
                 ),

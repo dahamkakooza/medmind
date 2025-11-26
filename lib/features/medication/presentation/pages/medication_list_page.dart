@@ -39,25 +39,25 @@ class _MedicationListPageState extends State<MedicationListPage> {
           if (state is MedicationLoading) {
             return const LoadingWidget();
           }
-          
+
           if (state is MedicationError) {
             return ErrorDisplayWidget(
               message: state.message,
               onRetry: () => context.read<MedicationBloc>().add(GetMedicationsRequested()),
             );
           }
-          
+
           if (state is MedicationLoaded) {
             if (state.medications.isEmpty) {
               return EmptyStateWidget(
                 icon: Icons.medication,
                 title: 'No medications yet',
-                message: 'Add your first medication to get started',
+                child: Text('Add your first medication to get started'),
                 actionText: 'Add Medication',
-                onAction: () => Navigator.pushNamed(context, '/add-medication'),
+                onAction: () => Navigator.pushNamed(context, '/add-medication'), description: '',
               );
             }
-            
+
             return RefreshIndicator(
               onRefresh: () async {
                 context.read<MedicationBloc>().add(GetMedicationsRequested());
@@ -79,7 +79,7 @@ class _MedicationListPageState extends State<MedicationListPage> {
               ),
             );
           }
-          
+
           return const SizedBox.shrink();
         },
       ),

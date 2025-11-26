@@ -16,7 +16,7 @@ class AdherenceAnalyticsPage extends StatefulWidget {
 
 class _AdherenceAnalyticsPageState extends State<AdherenceAnalyticsPage> {
   String _selectedPeriod = 'Last 30 Days';
-  
+
   @override
   void initState() {
     super.initState();
@@ -53,14 +53,14 @@ class _AdherenceAnalyticsPageState extends State<AdherenceAnalyticsPage> {
           if (state is AdherenceLoading) {
             return const LoadingWidget();
           }
-          
+
           if (state is AdherenceError) {
             return ErrorDisplayWidget(
               message: state.message,
               onRetry: _loadAnalytics,
             );
           }
-          
+
           if (state is AdherenceSummaryLoaded) {
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16),
@@ -70,11 +70,11 @@ class _AdherenceAnalyticsPageState extends State<AdherenceAnalyticsPage> {
                   // Period selector
                   _buildPeriodInfo(context),
                   const SizedBox(height: 24),
-                  
-                  // Key metrics
+
+                  // Key metrics - USING REAL DATA FROM STATE
                   _buildKeyMetrics(context, state),
                   const SizedBox(height: 24),
-                  
+
                   // Adherence chart
                   Text(
                     'Adherence Trend',
@@ -88,18 +88,18 @@ class _AdherenceAnalyticsPageState extends State<AdherenceAnalyticsPage> {
                     data: state.chartData,
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Insights
                   _buildInsights(context, state),
                   const SizedBox(height: 24),
-                  
+
                   // Export options
                   _buildExportOptions(context),
                 ],
               ),
             );
           }
-          
+
           return const SizedBox.shrink();
         },
       ),
@@ -157,9 +157,9 @@ class _AdherenceAnalyticsPageState extends State<AdherenceAnalyticsPage> {
               child: _buildMetricCard(
                 context,
                 'Overall Adherence',
-                '85%',
+                '${state.overallAdherence.toStringAsFixed(0)}%', // REAL DATA
                 Icons.trending_up,
-                Colors.green,
+                _getAdherenceColor(state.overallAdherence),
               ),
             ),
             const SizedBox(width: 12),
@@ -167,7 +167,7 @@ class _AdherenceAnalyticsPageState extends State<AdherenceAnalyticsPage> {
               child: _buildMetricCard(
                 context,
                 'Current Streak',
-                '12 days',
+                '${state.currentStreak} days', // REAL DATA
                 Icons.local_fire_department,
                 Colors.orange,
               ),
@@ -181,7 +181,7 @@ class _AdherenceAnalyticsPageState extends State<AdherenceAnalyticsPage> {
               child: _buildMetricCard(
                 context,
                 'Best Streak',
-                '28 days',
+                '${state.bestStreak} days', // REAL DATA
                 Icons.emoji_events,
                 Colors.amber,
               ),
@@ -191,7 +191,7 @@ class _AdherenceAnalyticsPageState extends State<AdherenceAnalyticsPage> {
               child: _buildMetricCard(
                 context,
                 'Missed Doses',
-                '3',
+                '${state.missedDoses}', // REAL DATA
                 Icons.warning_outlined,
                 Colors.red,
               ),
@@ -203,12 +203,12 @@ class _AdherenceAnalyticsPageState extends State<AdherenceAnalyticsPage> {
   }
 
   Widget _buildMetricCard(
-    BuildContext context,
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
+      BuildContext context,
+      String title,
+      String value,
+      IconData icon,
+      Color color,
+      ) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -254,9 +254,13 @@ class _AdherenceAnalyticsPageState extends State<AdherenceAnalyticsPage> {
                 _buildInsightItem(
                   context,
                   Icons.lightbulb_outline,
-                  'Great Progress!',
-                  'You\'ve maintained an 85% adherence rate this month.',
-                  Colors.green,
+                  state.overallAdherence >= 80
+                      ? 'Great Progress!'
+                      : 'Room for Improvement',
+                  state.overallAdherence >= 80
+                      ? 'You\'ve maintained a ${state.overallAdherence.toStringAsFixed(0)}% adherence rate.'
+                      : 'Your current adherence is ${state.overallAdherence.toStringAsFixed(0)}%. Try setting more reminders.',
+                  state.overallAdherence >= 80 ? Colors.green : Colors.orange,
                 ),
                 const Divider(),
                 _buildInsightItem(
@@ -270,9 +274,11 @@ class _AdherenceAnalyticsPageState extends State<AdherenceAnalyticsPage> {
                 _buildInsightItem(
                   context,
                   Icons.trending_up,
-                  'Improvement Opportunity',
-                  'Weekend adherence is 10% lower than weekdays.',
-                  Colors.orange,
+                  'Streak Performance',
+                  state.currentStreak >= 7
+                      ? 'Amazing ${state.currentStreak}-day streak! Keep it up.'
+                      : 'Build a longer streak by not missing doses.',
+                  state.currentStreak >= 7 ? Colors.green : Colors.orange,
                 ),
               ],
             ),
@@ -283,12 +289,12 @@ class _AdherenceAnalyticsPageState extends State<AdherenceAnalyticsPage> {
   }
 
   Widget _buildInsightItem(
-    BuildContext context,
-    IconData icon,
-    String title,
-    String description,
-    Color color,
-  ) {
+      BuildContext context,
+      IconData icon,
+      String title,
+      String description,
+      Color color,
+      ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -337,8 +343,8 @@ class _AdherenceAnalyticsPageState extends State<AdherenceAnalyticsPage> {
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Exporting to PDF...')),
+                  context.read<AdherenceBloc>().add(
+                    ExportAdherenceDataRequested(format: 'pdf'),
                   );
                 },
                 icon: const Icon(Icons.picture_as_pdf),
@@ -349,8 +355,8 @@ class _AdherenceAnalyticsPageState extends State<AdherenceAnalyticsPage> {
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Exporting to CSV...')),
+                  context.read<AdherenceBloc>().add(
+                    ExportAdherenceDataRequested(format: 'csv'),
                   );
                 },
                 icon: const Icon(Icons.table_chart),
@@ -361,5 +367,11 @@ class _AdherenceAnalyticsPageState extends State<AdherenceAnalyticsPage> {
         ),
       ],
     );
+  }
+
+  Color _getAdherenceColor(double percentage) {
+    if (percentage >= 90) return Colors.green;
+    if (percentage >= 70) return Colors.orange;
+    return Colors.red;
   }
 }

@@ -13,6 +13,7 @@ class EmptyStateWidget extends StatelessWidget {
   final String? actionText;
   final Widget? actionWidget;
   final bool showAction;
+  final Widget? child;
 
   const EmptyStateWidget({
     super.key,
@@ -26,6 +27,7 @@ class EmptyStateWidget extends StatelessWidget {
     this.actionText,
     this.actionWidget,
     this.showAction = true,
+    this.child,
   });
 
   @override
@@ -39,7 +41,7 @@ class EmptyStateWidget extends StatelessWidget {
             // Visual Element (Image or Icon)
             _buildVisualElement(context),
             const SizedBox(height: 24),
-            
+
             // Title
             Text(
               title,
@@ -50,7 +52,7 @@ class EmptyStateWidget extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
-            
+
             // Description
             Text(
               description,
@@ -59,10 +61,17 @@ class EmptyStateWidget extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
+
+            // Custom child widget
+            if (child != null) ...[
+              const SizedBox(height: 16),
+              child!,
+            ],
+
             const SizedBox(height: 24),
-            
+
             // Action Button (if provided)
-            if (showAction && (actionText != null || actionWidget != null)) 
+            if (showAction && (actionText != null || actionWidget != null))
               _buildActionButton(context),
           ],
         ),
@@ -105,7 +114,7 @@ class EmptyStateWidget extends StatelessWidget {
     if (actionWidget != null) {
       return actionWidget!;
     }
-    
+
     return ElevatedButton(
       onPressed: onAction,
       style: ElevatedButton.styleFrom(
@@ -137,6 +146,7 @@ class NoMedicationsEmptyState extends StatelessWidget {
       actionText: 'Add Medication',
       onAction: onAddMedication,
       iconColor: AppColors.primary,
+      child: null,
     );
   }
 }
@@ -159,6 +169,7 @@ class NoAdherenceDataEmptyState extends StatelessWidget {
       onAction: onViewMedications,
       iconColor: AppColors.info,
       showAction: onViewMedications != null,
+      child: null,
     );
   }
 }
@@ -179,6 +190,7 @@ class NoSearchResultsEmptyState extends StatelessWidget {
       icon: Icons.search_off_outlined,
       iconColor: AppColors.grey500,
       showAction: false,
+      child: null,
     );
   }
 }
@@ -194,6 +206,7 @@ class NoNotificationsEmptyState extends StatelessWidget {
       icon: Icons.notifications_none_outlined,
       iconColor: AppColors.grey500,
       showAction: false,
+      child: null,
     );
   }
 }
@@ -215,6 +228,7 @@ class OfflineEmptyState extends StatelessWidget {
       actionText: 'Retry',
       onAction: onRetry,
       iconColor: AppColors.warning,
+      child: null,
     );
   }
 }
@@ -238,6 +252,7 @@ class ErrorEmptyState extends StatelessWidget {
       actionText: 'Try Again',
       onAction: onRetry,
       iconColor: AppColors.error,
+      child: null,
     );
   }
 }
@@ -259,6 +274,7 @@ class NoUpcomingMedicationsEmptyState extends StatelessWidget {
       actionText: 'Add Medication',
       onAction: onAddMedication,
       iconColor: AppColors.success,
+      child: null,
     );
   }
 }
@@ -280,6 +296,7 @@ class NoHistoryEmptyState extends StatelessWidget {
       actionText: 'View Medications',
       onAction: onViewMedications,
       iconColor: AppColors.secondary,
+      child: null,
     );
   }
 }
@@ -325,7 +342,7 @@ class CustomEmptyState extends StatelessWidget {
                 color: iconColor ?? Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
               ),
             const SizedBox(height: 24),
-            
+
             // Title
             Text(
               title,
@@ -336,7 +353,7 @@ class CustomEmptyState extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
-            
+
             // Description
             Text(
               description,
@@ -346,19 +363,19 @@ class CustomEmptyState extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
-            
+
             // Actions
             if (actions.isNotEmpty)
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: actions
                     .map((action) => Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: action,
-                        ))
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: action,
+                ))
                     .toList(),
               ),
-            
+
             // Footer
             if (footer != null) ...[
               const SizedBox(height: 16),
@@ -403,7 +420,7 @@ class LoadingEmptyState extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            
+
             // Title
             Text(
               title,
@@ -414,7 +431,7 @@ class LoadingEmptyState extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
-            
+
             // Description
             Text(
               description,

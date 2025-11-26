@@ -4,9 +4,11 @@ import '../../../domain/usecases/add_medication.dart';
 import '../../../domain/usecases/update_medication.dart';
 import '../../../domain/usecases/delete_medication.dart';
 import '../../../../../core/usecases/usecase.dart';
+import 'package:injectable/injectable.dart';
 import 'medication_event.dart';
 import 'medication_state.dart';
 
+@injectable
 class MedicationBloc extends Bloc<MedicationEvent, MedicationState> {
   final GetMedications getMedications;
   final AddMedication addMedication;
