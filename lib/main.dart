@@ -14,6 +14,7 @@ import 'features/auth/presentation/blocs/auth_bloc.dart';
 import 'features/auth/presentation/blocs/auth_event.dart';
 import 'features/auth/presentation/blocs/auth_state.dart';
 import 'features/auth/presentation/pages/login_page.dart';
+import 'features/auth/presentation/pages/register_page.dart';
 import 'features/dashboard/presentation/pages/dashboard_page.dart';
 
 // Repository implementations
@@ -135,6 +136,34 @@ class MedMindApp extends StatelessWidget {
           home: initializationError != null
               ? ErrorScreen(error: initializationError!)
               : const AuthWrapper(),
+          onGenerateRoute: (settings) {
+            // Handle navigation routes
+            switch (settings.name) {
+              case '/login':
+                return MaterialPageRoute(builder: (_) => const LoginPage());
+              case '/register':
+                return MaterialPageRoute(builder: (_) => const RegisterPage());
+              case '/forgot-password':
+                return MaterialPageRoute(
+                  builder: (_) => Scaffold(
+                    appBar: AppBar(title: const Text('Reset Password')),
+                    body: const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(24.0),
+                        child: Text(
+                          'Password reset functionality coming soon!\n\nFor now, you can reset your password through Firebase Console.',
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              case '/dashboard':
+                return MaterialPageRoute(builder: (_) => const DashboardPage());
+              default:
+                return null;
+            }
+          },
         ),
       ),
     );
