@@ -1,7 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:dartz/dartz.dart';
-import 'package:flutter/material.dart';
-import '../../../../../core/errors/failures.dart';
 import '../../../../../core/usecases/usecase.dart';
 import '../../../domain/entities/user_preferences_entity.dart';
 import '../../../domain/usecases/get_user_preferences.dart';

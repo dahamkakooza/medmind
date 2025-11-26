@@ -70,7 +70,7 @@ class MedicationForm extends StatelessWidget {
             const SizedBox(height: 16),
             
             DropdownButtonFormField<String>(
-              value: frequency,
+              initialValue: frequency,
               decoration: const InputDecoration(
                 labelText: 'Frequency',
                 border: OutlineInputBorder(),

@@ -49,9 +49,9 @@ class MedicationDetailPage extends StatelessWidget {
         listener: (context, state) {
           if (state is MedicationDeleted) {
             Navigator.pop(context);
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Medication deleted')),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('Medication deleted')));
           }
         },
         child: SingleChildScrollView(
@@ -87,7 +87,10 @@ class MedicationDetailPage extends StatelessWidget {
             const SizedBox(height: 12),
             _buildInfoRow('Name', medication.name),
             _buildInfoRow('Dosage', medication.dosage),
-            _buildInfoRow('Frequency', medication.frequency),
+            _buildInfoRow(
+              'Frequency',
+              medication.frequency.toString().split('.').last,
+            ),
           ],
         ),
       ),
@@ -101,10 +104,7 @@ class MedicationDetailPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Schedule',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text('Schedule', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 12),
             _buildInfoRow(
               'Reminder Time',
@@ -121,8 +121,10 @@ class MedicationDetailPage extends StatelessWidget {
   }
 
   Widget _buildInstructionsCard(BuildContext context) {
-    if (medication.instructions.isEmpty) return const SizedBox.shrink();
-    
+    if (medication.instructions == null || medication.instructions!.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -134,7 +136,7 @@ class MedicationDetailPage extends StatelessWidget {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 12),
-            Text(medication.instructions),
+            Text(medication.instructions!),
           ],
         ),
       ),
@@ -177,7 +179,11 @@ class MedicationDetailPage extends StatelessWidget {
         const SizedBox(height: 8),
         OutlinedButton.icon(
           onPressed: () {
-            Navigator.pushNamed(context, '/adherence-history', arguments: medication);
+            Navigator.pushNamed(
+              context,
+              '/adherence-history',
+              arguments: medication,
+            );
           },
           icon: const Icon(Icons.history),
           label: const Text('View History'),

@@ -72,21 +72,17 @@ class ProfileError extends ProfileState {
 }
 
 class PreferencesLoadError extends ProfileError {
-  const PreferencesLoadError({required String message})
-      : super(message: message);
+  const PreferencesLoadError({required super.message});
 }
 
 class PreferencesSaveError extends ProfileError {
-  const PreferencesSaveError({required String message})
-      : super(message: message);
+  const PreferencesSaveError({required super.message});
 }
 
 class DataExportError extends ProfileError {
-  const DataExportError({required String message})
-      : super(message: message);
+  const DataExportError({required super.message});
 }
 
 class DataClearError extends ProfileError {
-  const DataClearError({required String message})
-      : super(message: message);
+  const DataClearError({required super.message});
 }
