@@ -1,18 +1,17 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart'; // ADD THIS
+import 'package:flutter/material.dart';
 
-// Remove ThemeMode enum since we're using Flutter's
 enum Language { english, spanish, french }
 enum TemperatureUnit { celsius, fahrenheit }
 enum DistanceUnit { metric, imperial }
 
 class UserPreferencesModel extends Equatable {
-  final ThemeMode themeMode; // CHANGED TO FLUTTER THEMEMODE
+  final ThemeMode themeMode;
   final bool notificationsEnabled;
   final bool medicationRemindersEnabled;
   final bool refillRemindersEnabled;
-  final int reminderSnoozeDuration; // in minutes
-  final int reminderAdvanceTime; // in minutes
+  final int reminderSnoozeDuration;
+  final int reminderAdvanceTime;
   final Language language;
   final TemperatureUnit temperatureUnit;
   final DistanceUnit distanceUnit;
@@ -24,7 +23,7 @@ class UserPreferencesModel extends Equatable {
   final Map<String, dynamic>? customSettings;
 
   const UserPreferencesModel({
-    this.themeMode = ThemeMode.system, // CHANGED TO FLUTTER THEMEMODE
+    this.themeMode = ThemeMode.system,
     this.notificationsEnabled = true,
     this.medicationRemindersEnabled = true,
     this.refillRemindersEnabled = true,
@@ -43,7 +42,7 @@ class UserPreferencesModel extends Equatable {
 
   factory UserPreferencesModel.fromJson(Map<String, dynamic> json) {
     return UserPreferencesModel(
-      themeMode: _parseThemeMode(json['themeMode']), // UPDATED
+      themeMode: _parseThemeMode(json['themeMode']),
       notificationsEnabled: json['notificationsEnabled'] as bool? ?? true,
       medicationRemindersEnabled: json['medicationRemindersEnabled'] as bool? ?? true,
       refillRemindersEnabled: json['refillRemindersEnabled'] as bool? ?? true,
@@ -69,15 +68,15 @@ class UserPreferencesModel extends Equatable {
 
   Map<String, dynamic> toJson() {
     return {
-      'themeMode': _themeModeToString(themeMode), // UPDATED
+      'themeMode': _themeModeToString(themeMode),
       'notificationsEnabled': notificationsEnabled,
       'medicationRemindersEnabled': medicationRemindersEnabled,
       'refillRemindersEnabled': refillRemindersEnabled,
       'reminderSnoozeDuration': reminderSnoozeDuration,
       'reminderAdvanceTime': reminderAdvanceTime,
-      'language': language.name,
-      'temperatureUnit': temperatureUnit.name,
-      'distanceUnit': distanceUnit.name,
+      'language': _languageToString(language),
+      'temperatureUnit': _temperatureUnitToString(temperatureUnit),
+      'distanceUnit': _distanceUnitToString(distanceUnit),
       'biometricAuthEnabled': biometricAuthEnabled,
       'dataBackupEnabled': dataBackupEnabled,
       'analyticsEnabled': analyticsEnabled,
@@ -88,7 +87,7 @@ class UserPreferencesModel extends Equatable {
   }
 
   UserPreferencesModel copyWith({
-    ThemeMode? themeMode, // CHANGED TO FLUTTER THEMEMODE
+    ThemeMode? themeMode,
     bool? notificationsEnabled,
     bool? medicationRemindersEnabled,
     bool? refillRemindersEnabled,
@@ -143,7 +142,6 @@ class UserPreferencesModel extends Equatable {
       case ThemeMode.dark:
         return 'dark';
       case ThemeMode.system:
-      default:
         return 'system';
     }
   }
@@ -160,6 +158,17 @@ class UserPreferencesModel extends Equatable {
     }
   }
 
+  static String _languageToString(Language language) {
+    switch (language) {
+      case Language.spanish:
+        return 'spanish';
+      case Language.french:
+        return 'french';
+      case Language.english:
+        return 'english';
+    }
+  }
+
   static TemperatureUnit _parseTemperatureUnit(String? unit) {
     switch (unit) {
       case 'fahrenheit':
@@ -167,6 +176,15 @@ class UserPreferencesModel extends Equatable {
       case 'celsius':
       default:
         return TemperatureUnit.celsius;
+    }
+  }
+
+  static String _temperatureUnitToString(TemperatureUnit unit) {
+    switch (unit) {
+      case TemperatureUnit.fahrenheit:
+        return 'fahrenheit';
+      case TemperatureUnit.celsius:
+        return 'celsius';
     }
   }
 
@@ -180,40 +198,53 @@ class UserPreferencesModel extends Equatable {
     }
   }
 
-  // Convenience getters
-  bool get isDarkMode => themeMode == ThemeMode.dark;
-  bool get isLightMode => themeMode == ThemeMode.light;
-  bool get isSystemTheme => themeMode == ThemeMode.system;
+  static String _distanceUnitToString(DistanceUnit unit) {
+    switch (unit) {
+      case DistanceUnit.imperial:
+        return 'imperial';
+      case DistanceUnit.metric:
+        return 'metric';
+    }
+  }
 
-  String get languageCode {
+  // Convenience getters for UI
+  String get themeDisplayName {
+    switch (themeMode) {
+      case ThemeMode.light:
+        return 'Light';
+      case ThemeMode.dark:
+        return 'Dark';
+      case ThemeMode.system:
+        return 'System Default';
+    }
+  }
+
+  String get languageDisplayName {
     switch (language) {
       case Language.spanish:
-        return 'es';
+        return 'Español';
       case Language.french:
-        return 'fr';
+        return 'Français';
       case Language.english:
-      default:
-        return 'en';
+        return 'English';
     }
   }
 
-  String get temperatureSymbol {
+  String get temperatureDisplayName {
     switch (temperatureUnit) {
       case TemperatureUnit.fahrenheit:
-        return '°F';
+        return 'Fahrenheit (°F)';
       case TemperatureUnit.celsius:
-      default:
-        return '°C';
+        return 'Celsius (°C)';
     }
   }
 
-  String get distanceSymbol {
+  String get distanceDisplayName {
     switch (distanceUnit) {
       case DistanceUnit.imperial:
-        return 'mi';
+        return 'Imperial (miles)';
       case DistanceUnit.metric:
-      default:
-        return 'km';
+        return 'Metric (kilometers)';
     }
   }
 
@@ -247,28 +278,25 @@ class UserPreferencesModel extends Equatable {
   String toString() {
     return 'UserPreferencesModel('
         'themeMode: $themeMode, '
-        'notificationsEnabled: $notificationsEnabled, '
-        'medicationRemindersEnabled: $medicationRemindersEnabled, '
-        'refillRemindersEnabled: $refillRemindersEnabled, '
-        'reminderSnoozeDuration: $reminderSnoozeDuration, '
-        'reminderAdvanceTime: $reminderAdvanceTime, '
         'language: $language, '
-        'temperatureUnit: $temperatureUnit, '
-        'distanceUnit: $distanceUnit, '
-        'biometricAuthEnabled: $biometricAuthEnabled, '
-        'dataBackupEnabled: $dataBackupEnabled, '
-        'analyticsEnabled: $analyticsEnabled, '
-        'lastBackup: $lastBackup, '
-        'lastSync: $lastSync'
+        'notifications: $notificationsEnabled, '
+        'biometricAuth: $biometricAuthEnabled'
         ')';
   }
 }
 
-// Extension methods for easy conversion
+// Extension for additional functionality
 extension UserPreferencesModelExtensions on UserPreferencesModel {
-  // Convert to entity (if using separate entity classes)
-  Map<String, dynamic> toEntityMap() {
-    return toJson();
+  // Convert language to locale code
+  String get languageCode {
+    switch (language) {
+      case Language.spanish:
+        return 'es';
+      case Language.french:
+        return 'fr';
+      case Language.english:
+        return 'en';
+    }
   }
 
   // Check if preferences have been modified from defaults
@@ -276,76 +304,15 @@ extension UserPreferencesModelExtensions on UserPreferencesModel {
     return this != UserPreferencesModel.defaultPreferences;
   }
 
-  // Get modified fields compared to another preferences model
-  Map<String, dynamic> getModifiedFields(UserPreferencesModel other) {
-    final modifiedFields = <String, dynamic>{};
-
-    if (themeMode != other.themeMode) {
-      modifiedFields['themeMode'] = UserPreferencesModel._themeModeToString(themeMode);
-    }
-    if (notificationsEnabled != other.notificationsEnabled) {
-      modifiedFields['notificationsEnabled'] = notificationsEnabled;
-    }
-    if (medicationRemindersEnabled != other.medicationRemindersEnabled) {
-      modifiedFields['medicationRemindersEnabled'] = medicationRemindersEnabled;
-    }
-    if (refillRemindersEnabled != other.refillRemindersEnabled) {
-      modifiedFields['refillRemindersEnabled'] = refillRemindersEnabled;
-    }
-    if (reminderSnoozeDuration != other.reminderSnoozeDuration) {
-      modifiedFields['reminderSnoozeDuration'] = reminderSnoozeDuration;
-    }
-    if (reminderAdvanceTime != other.reminderAdvanceTime) {
-      modifiedFields['reminderAdvanceTime'] = reminderAdvanceTime;
-    }
-    if (language != other.language) {
-      modifiedFields['language'] = language.name;
-    }
-    if (temperatureUnit != other.temperatureUnit) {
-      modifiedFields['temperatureUnit'] = temperatureUnit.name;
-    }
-    if (distanceUnit != other.distanceUnit) {
-      modifiedFields['distanceUnit'] = distanceUnit.name;
-    }
-    if (biometricAuthEnabled != other.biometricAuthEnabled) {
-      modifiedFields['biometricAuthEnabled'] = biometricAuthEnabled;
-    }
-    if (dataBackupEnabled != other.dataBackupEnabled) {
-      modifiedFields['dataBackupEnabled'] = dataBackupEnabled;
-    }
-    if (analyticsEnabled != other.analyticsEnabled) {
-      modifiedFields['analyticsEnabled'] = analyticsEnabled;
-    }
-
-    return modifiedFields;
-  }
-}
-
-// Helper class for preference updates
-class PreferenceUpdate {
-  final String key;
-  final dynamic value;
-  final DateTime timestamp;
-
-  PreferenceUpdate({
-    required this.key,
-    required this.value,
-    DateTime? timestamp,
-  }) : timestamp = timestamp ?? DateTime.now();
-
-  Map<String, dynamic> toJson() {
+  // Get a simple map of display values for UI
+  Map<String, String> get displayValues {
     return {
-      'key': key,
-      'value': value,
-      'timestamp': timestamp.toIso8601String(),
+      'theme': themeDisplayName,
+      'language': languageDisplayName,
+      'temperature': temperatureDisplayName,
+      'distance': distanceDisplayName,
+      'snooze': '$reminderSnoozeDuration minutes',
+      'advance': '$reminderAdvanceTime minutes',
     };
-  }
-
-  factory PreferenceUpdate.fromJson(Map<String, dynamic> json) {
-    return PreferenceUpdate(
-      key: json['key'] as String,
-      value: json['value'],
-      timestamp: DateTime.parse(json['timestamp'] as String),
-    );
   }
 }
