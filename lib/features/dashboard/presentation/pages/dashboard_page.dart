@@ -8,6 +8,7 @@ import '../blocs/dashboard_bloc/dashboard_event.dart';
 import '../blocs/dashboard_bloc/dashboard_state.dart';
 import '../../../../core/widgets/loading_widget.dart';
 import '../../../../core/widgets/error_widget.dart';
+import '../../../../core/services/pending_dose_tracker.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -44,10 +45,7 @@ class _DashboardPageState extends State<DashboardPage> {
           ],
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () => Navigator.pushNamed(context, '/notifications'),
-          ),
+          _buildNotificationButton(),
           IconButton(
             icon: const Icon(Icons.person_outline),
             onPressed: () => Navigator.pushNamed(context, '/profile'),
@@ -85,6 +83,10 @@ class _DashboardPageState extends State<DashboardPage> {
                       onViewHistory: () =>
                           Navigator.pushNamed(context, '/adherence-history'),
                     ),
+                    const SizedBox(height: 24),
+
+                    // Notification Summary
+                    _buildNotificationSummary(),
                     const SizedBox(height: 24),
 
                     // Today's Medications
@@ -128,6 +130,129 @@ class _DashboardPageState extends State<DashboardPage> {
         },
       ),
     );
+  }
+
+  Widget _buildNotificationButton() {
+    return FutureBuilder<int>(
+      future: _getPendingDoseCount(),
+      builder: (context, snapshot) {
+        final count = snapshot.data ?? 0;
+
+        return Stack(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.notifications_outlined),
+              onPressed: () async {
+                await Navigator.pushNamed(context, '/pending-doses');
+                // Refresh count after returning
+                setState(() {});
+              },
+            ),
+            if (count > 0)
+              Positioned(
+                right: 8,
+                top: 8,
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  constraints: const BoxConstraints(
+                    minWidth: 18,
+                    minHeight: 18,
+                  ),
+                  child: Text(
+                    count > 99 ? '99+' : count.toString(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildNotificationSummary() {
+    return FutureBuilder<int>(
+      future: _getPendingDoseCount(),
+      builder: (context, snapshot) {
+        final count = snapshot.data ?? 0;
+
+        return Card(
+          child: InkWell(
+            onTap: () async {
+              await Navigator.pushNamed(context, '/pending-doses');
+              setState(() {});
+            },
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).primaryColor.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.notifications_active,
+                      color: Theme.of(context).primaryColor,
+                      size: 28,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Pending Doses',
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          count == 0
+                              ? 'All caught up!'
+                              : '$count dose${count == 1 ? '' : 's'} need to be taken',
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: count > 0
+                                    ? Colors.orange[700]
+                                    : Colors.grey[600],
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16,
+                    color: Colors.grey[400],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<int> _getPendingDoseCount() async {
+    try {
+      return await PendingDoseTracker.getPendingDoseCount();
+    } catch (e) {
+      return 0;
+    }
   }
 
   String _getGreeting() {

@@ -4,6 +4,7 @@ import '../../../domain/usecases/add_medication.dart';
 import '../../../domain/usecases/update_medication.dart';
 import '../../../domain/usecases/delete_medication.dart';
 import '../../../../../core/usecases/usecase.dart';
+import '../../../../../core/utils/notification_utils.dart';
 import 'medication_event.dart';
 import 'medication_state.dart';
 
@@ -32,7 +33,8 @@ class MedicationBloc extends Bloc<MedicationEvent, MedicationState> {
     emit(MedicationLoading());
     final result = await getMedications(NoParams());
     result.fold(
-      (failure) => emit(const MedicationError(message: 'Failed to load medications')),
+      (failure) =>
+          emit(const MedicationError(message: 'Failed to load medications')),
       (medications) => emit(MedicationLoaded(medications: medications)),
     );
   }
@@ -42,11 +44,48 @@ class MedicationBloc extends Bloc<MedicationEvent, MedicationState> {
     Emitter<MedicationState> emit,
   ) async {
     emit(MedicationLoading());
-    final result = await addMedication(AddMedicationParams(medication: event.medication));
-    result.fold(
-      (failure) => emit(const MedicationError(message: 'Failed to add medication')),
-      (medication) => emit(MedicationAdded(medication: medication)),
+    final result = await addMedication(
+      AddMedicationParams(medication: event.medication),
     );
+    result.fold(
+      (failure) =>
+          emit(const MedicationError(message: 'Failed to add medication')),
+      (medication) async {
+        // Schedule notification if reminders are enabled
+        if (medication.enableReminders) {
+          await _scheduleNotification(medication);
+        }
+        emit(MedicationAdded(medication: medication));
+      },
+    );
+  }
+
+  Future<void> _scheduleNotification(dynamic medication) async {
+    try {
+      // Schedule a notification for each time in the medication schedule
+      for (int i = 0; i < medication.times.length; i++) {
+        final time = medication.times[i];
+        final scheduledTime = DateTime(
+          DateTime.now().year,
+          DateTime.now().month,
+          DateTime.now().day,
+          time.hour,
+          time.minute,
+        );
+
+        // Use unique ID for each time slot (medication ID + time index)
+        await NotificationUtils.scheduleMedicationReminder(
+          id: medication.id.hashCode + i,
+          title: 'Medication Reminder',
+          body: 'Time to take ${medication.name} - ${medication.dosage}',
+          scheduledTime: scheduledTime,
+          payload: medication.id,
+        );
+      }
+    } catch (e) {
+      // Silently fail - don't block medication creation if notification fails
+      print('Failed to schedule notification: $e');
+    }
   }
 
   Future<void> _onUpdateMedicationRequested(
@@ -54,10 +93,25 @@ class MedicationBloc extends Bloc<MedicationEvent, MedicationState> {
     Emitter<MedicationState> emit,
   ) async {
     emit(MedicationLoading());
-    final result = await updateMedication(UpdateMedicationParams(medication: event.medication));
+    final result = await updateMedication(
+      UpdateMedicationParams(medication: event.medication),
+    );
     result.fold(
-      (failure) => emit(const MedicationError(message: 'Failed to update medication')),
-      (medication) => emit(MedicationUpdated(medication: medication)),
+      (failure) =>
+          emit(const MedicationError(message: 'Failed to update medication')),
+      (medication) async {
+        // Cancel all old notifications (we don't know how many times were previously set)
+        // Cancel up to 10 possible time slots to be safe
+        for (int i = 0; i < 10; i++) {
+          await NotificationUtils.cancelReminder(medication.id.hashCode + i);
+        }
+
+        // Schedule new notifications if reminders are enabled
+        if (medication.enableReminders) {
+          await _scheduleNotification(medication);
+        }
+        emit(MedicationUpdated(medication: medication));
+      },
     );
   }
 
@@ -66,10 +120,22 @@ class MedicationBloc extends Bloc<MedicationEvent, MedicationState> {
     Emitter<MedicationState> emit,
   ) async {
     emit(MedicationLoading());
-    final result = await deleteMedication(DeleteMedicationParams(medicationId: event.medicationId));
+    final result = await deleteMedication(
+      DeleteMedicationParams(medicationId: event.medicationId),
+    );
     result.fold(
-      (failure) => emit(const MedicationError(message: 'Failed to delete medication')),
-      (_) => emit(MedicationDeleted(medicationId: event.medicationId)),
+      (failure) =>
+          emit(const MedicationError(message: 'Failed to delete medication')),
+      (_) async {
+        // Cancel all notifications for this medication
+        // Cancel up to 10 possible time slots to be safe
+        for (int i = 0; i < 10; i++) {
+          await NotificationUtils.cancelReminder(
+            event.medicationId.hashCode + i,
+          );
+        }
+        emit(MedicationDeleted(medicationId: event.medicationId));
+      },
     );
   }
 }

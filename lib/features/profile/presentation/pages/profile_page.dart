@@ -28,46 +28,40 @@ class ProfilePage extends StatelessWidget {
             // Profile Header
             CircleAvatar(
               radius: 50,
-              backgroundImage: user?.photoURL != null 
-                  ? NetworkImage(user!.photoURL!) 
+              backgroundImage: user?.photoURL != null
+                  ? NetworkImage(user!.photoURL!)
                   : null,
-              child: user?.photoURL == null 
-                  ? const Icon(Icons.person, size: 50) 
+              child: user?.photoURL == null
+                  ? const Icon(Icons.person, size: 50)
                   : null,
             ),
             const SizedBox(height: 16),
             Text(
               user?.displayName ?? 'No Name',
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             Text(
               user?.email ?? 'No Email',
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.grey,
-              ),
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
             ),
             const SizedBox(height: 8),
             if (user?.emailVerified == false)
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.orange.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Text(
                   'Email not verified',
-                  style: TextStyle(
-                    color: Colors.orange,
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: Colors.orange, fontSize: 12),
                 ),
               ),
             const SizedBox(height: 32),
-            
+
             // Profile Options
             _buildProfileOption(
               context,
@@ -110,7 +104,7 @@ class ProfilePage extends StatelessWidget {
               },
             ),
             const SizedBox(height: 24),
-            
+
             // Logout Button
             SizedBox(
               width: double.infinity,
@@ -144,6 +138,12 @@ class ProfilePage extends StatelessWidget {
                       ]);
 
                       if (context.mounted) {
+                        // Navigate to login page and clear navigation stack
+                        Navigator.of(
+                          context,
+                        ).pushNamedAndRemoveUntil('/login', (route) => false);
+
+                        // Show success message
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('Logged out successfully'),
