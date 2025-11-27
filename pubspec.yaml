@@ -53,6 +53,16 @@ dependencies:
   # Permissions
   permission_handler: ^11.3.1
 
+  # UPDATED DEPENDENCIES WITH COMPATIBLE VERSIONS:
+  # Image Picker for profile pictures
+  image_picker: ^1.1.2
+  
+  # URL Launcher for help & support links
+  url_launcher: ^6.2.2
+  
+  # Package Info for About page (UPDATED VERSION)
+  # package_info_plus: ^4.3.0  # This version exists and is compatible
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -64,4 +74,3 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  # Add assets, fonts, etc.

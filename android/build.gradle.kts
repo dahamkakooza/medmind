@@ -1,14 +1,14 @@
 buildscript {
-    val kotlinVersion by extra("1.7.10") // Kotlin DSL syntax
+    val kotlinVersion by extra("1.9.24") // Updated Kotlin version
     repositories {
         google()
         mavenCentral()
     }
 
     dependencies {
-        classpath("com.android.tools.build:gradle:7.3.0")
+        classpath("com.android.tools.build:gradle:8.4.0") // Updated from 7.3.0 to 8.4.0
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
-        classpath("com.google.gms:google-services:4.4.0") // ADD THIS FOR FIREBASE
+        classpath("com.google.gms:google-services:4.4.2") // Updated for compatibility
     }
 }
 
