@@ -590,20 +590,11 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Privacy & Security'),
-      ),
+      appBar: AppBar(title: const Text('Privacy & Security')),
       body: BlocListener<ProfileBloc, ProfileState>(
         listener: (context, state) {
-          // Handle password change success/error
-          if (state is PasswordChangeSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.green,
-              ),
-            );
-          } else if (state is PasswordChangeError) {
+          // Handle profile errors
+          if (state is ProfileError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
@@ -611,20 +602,12 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
               ),
             );
           }
-
-          // Handle 2FA success/error
-          if (state is TwoFactorSuccess) {
+          // Handle successful preference updates
+          if (state is PreferencesUpdated) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
+              const SnackBar(
+                content: Text('Settings updated successfully'),
                 backgroundColor: Colors.green,
-              ),
-            );
-          } else if (state is TwoFactorError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
               ),
             );
           }
@@ -757,17 +740,17 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
                       _buildPrivacyLink(
                         'Privacy Policy',
                         Icons.privacy_tip,
-                            () => _showPrivacyPolicy(context),
+                        () => _showPrivacyPolicy(context),
                       ),
                       _buildPrivacyLink(
                         'Terms of Service',
                         Icons.description,
-                            () => _showTermsOfService(context),
+                        () => _showTermsOfService(context),
                       ),
                       _buildPrivacyLink(
                         'Data Processing Agreement',
                         Icons.assignment,
-                            () => _showDataAgreement(context),
+                        () => _showDataAgreement(context),
                       ),
                     ],
                   ),
@@ -795,12 +778,12 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
   }
 
   Widget _buildSettingItem(
-      BuildContext context, {
-        required IconData icon,
-        required String title,
-        required String subtitle,
-        required VoidCallback onTap,
-      }) {
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: ListTile(
@@ -814,44 +797,38 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
   }
 
   Widget _buildToggleSetting(
-      BuildContext context, {
-        required IconData icon,
-        required String title,
-        required String subtitle,
-        required bool value,
-        required ValueChanged<bool> onChanged,
-      }) {
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: ListTile(
         leading: Icon(icon),
         title: Text(title),
         subtitle: Text(subtitle),
-        trailing: Switch(
-          value: value,
-          onChanged: onChanged,
-        ),
+        trailing: Switch(value: value, onChanged: onChanged),
         onTap: () => onChanged(!value),
       ),
     );
   }
 
   Widget _buildActionItem(
-      BuildContext context, {
-        required IconData icon,
-        required String title,
-        required String subtitle,
-        Color? color,
-        required VoidCallback onTap,
-      }) {
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    Color? color,
+    required VoidCallback onTap,
+  }) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: ListTile(
         leading: Icon(icon, color: color),
-        title: Text(
-          title,
-          style: TextStyle(color: color),
-        ),
+        title: Text(title, style: TextStyle(color: color)),
         subtitle: Text(
           subtitle,
           style: TextStyle(color: color?.withOpacity(0.7)),
@@ -877,106 +854,69 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
     );
   }
 
-  // UPDATED: Complete Password Change Dialog
+  // Simplified: Password Change Dialog (Coming Soon)
   void _showChangePasswordDialog(BuildContext context) {
-    final currentPasswordController = TextEditingController();
-    final newPasswordController = TextEditingController();
-    final confirmPasswordController = TextEditingController();
-
     showDialog(
       context: context,
-      builder: (context) => BlocBuilder<ProfileBloc, ProfileState>(
-        builder: (context, state) {
-          return AlertDialog(
-            title: const Text('Change Password'),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: currentPasswordController,
-                    obscureText: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Current Password',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: newPasswordController,
-                    obscureText: true,
-                    decoration: const InputDecoration(
-                      labelText: 'New Password',
-                      border: OutlineInputBorder(),
-                      hintText: 'At least 6 characters',
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: confirmPasswordController,
-                    obscureText: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Confirm New Password',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  if (state is PasswordChanging)
-                    const LinearProgressIndicator(),
-                  if (state is PasswordChangeError)
-                    Text(
-                      state.message,
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-              ElevatedButton(
-                onPressed: state is PasswordChanging
-                    ? null
-                    : () {
-                  context.read<ProfileBloc>().add(
-                    ChangePasswordRequested(
-                      currentPassword: currentPasswordController.text,
-                      newPassword: newPasswordController.text,
-                      confirmPassword: confirmPasswordController.text,
-                    ),
-                  );
-                },
-                child: const Text('Change Password'),
-              ),
-            ],
-          );
-        },
+      builder: (context) => AlertDialog(
+        title: const Text('Change Password'),
+        content: const Text(
+          'Password change functionality coming soon!\n\n'
+          'For now, you can reset your password through the login screen.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
       ),
     );
   }
 
-  // UPDATED: Complete Two-Factor Authentication Dialog
+  // Simplified: Two-Factor Authentication Dialog (Coming Soon)
   void _showTwoFactorDialog(BuildContext context) {
-    final phoneController = TextEditingController();
-    bool _2faEnabled = false;
-
     showDialog(
       context: context,
-      builder: (context) => BlocListener<ProfileBloc, ProfileState>(
-        listener: (context, state) {
-          if (state is TwoFactorVerificationRequired) {
-            Navigator.pop(context); // Close 2FA setup dialog
-            _showVerificationDialog(context, state.verificationId, state.phoneNumber);
-          }
-        },
-        child: StatefulBuilder(
-          builder: (context, setState) {
-            return BlocBuilder<ProfileBloc, ProfileState>(
-              builder: (context, state) {
-                return AlertDialog(
-                  title: const Text('Two-Factor Authentication'),
+      builder: (context) => AlertDialog(
+        title: const Text('Two-Factor Authentication'),
+        content: const Text(
+          'Two-factor authentication coming soon!\n\n'
+          'This feature will add an extra layer of security to your account.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Placeholder for verification dialog
+  void _showVerificationDialog(BuildContext context, String verificationId, String phoneNumber) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Verify Code'),
+        content: const Text('Verification coming soon!'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Placeholder method to avoid errors
+  void _showPlaceholderDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Coming Soon'),
                   content: SingleChildScrollView(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -988,7 +928,8 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
                             const Spacer(),
                             Switch(
                               value: _2faEnabled,
-                              onChanged: (value) => setState(() => _2faEnabled = value),
+                              onChanged: (value) =>
+                                  setState(() => _2faEnabled = value),
                             ),
                           ],
                         ),
@@ -996,8 +937,8 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
                           const SizedBox(height: 16),
                           const Text(
                             'Add an extra layer of security to your account. '
-                                'You\'ll need to enter a verification code sent to your phone '
-                                'when signing in.',
+                            'You\'ll need to enter a verification code sent to your phone '
+                            'when signing in.',
                             style: TextStyle(fontSize: 14, color: Colors.grey),
                           ),
                           const SizedBox(height: 16),
@@ -1023,7 +964,7 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
                           const SizedBox(height: 16),
                           const Text(
                             'Two-factor authentication is currently disabled. '
-                                'Enable it for enhanced account security.',
+                            'Enable it for enhanced account security.',
                             style: TextStyle(fontSize: 14, color: Colors.grey),
                           ),
                         ],
@@ -1040,13 +981,13 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
                         onPressed: state is TwoFactorLoading
                             ? null
                             : () {
-                          context.read<ProfileBloc>().add(
-                            TwoFactorAuthRequested(
-                              enable: true,
-                              phoneNumber: phoneController.text,
-                            ),
-                          );
-                        },
+                                context.read<ProfileBloc>().add(
+                                  TwoFactorAuthRequested(
+                                    enable: true,
+                                    phoneNumber: phoneController.text,
+                                  ),
+                                );
+                              },
                         child: const Text('Enable 2FA'),
                       ),
                   ],
@@ -1060,7 +1001,11 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
   }
 
   // NEW: Verification Code Dialog for 2FA
-  void _showVerificationDialog(BuildContext context, String verificationId, String phoneNumber) {
+  void _showVerificationDialog(
+    BuildContext context,
+    String verificationId,
+    String phoneNumber,
+  ) {
     final codeController = TextEditingController();
 
     showDialog(
@@ -1109,13 +1054,13 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
                 onPressed: state is TwoFactorLoading
                     ? null
                     : () {
-                  context.read<ProfileBloc>().add(
-                    VerifyTwoFactorCode(
-                      code: codeController.text,
-                      verificationId: verificationId,
-                    ),
-                  );
-                },
+                        context.read<ProfileBloc>().add(
+                          VerifyTwoFactorCode(
+                            code: codeController.text,
+                            verificationId: verificationId,
+                          ),
+                        );
+                      },
                 child: const Text('Verify'),
               ),
             ],
@@ -1171,7 +1116,9 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Export Data'),
-        content: const Text('This will export all your personal data including medication history, preferences, and profile information.'),
+        content: const Text(
+          'This will export all your personal data including medication history, preferences, and profile information.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -1183,7 +1130,9 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
               context.read<ProfileBloc>().add(ExportUserData());
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Data export started. You will be notified when it\'s ready.'),
+                  content: Text(
+                    'Data export started. You will be notified when it\'s ready.',
+                  ),
                   backgroundColor: Colors.green,
                 ),
               );
@@ -1200,7 +1149,9 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Clear All Data'),
-        content: const Text('This will delete all your local app data including medications, reminders, and preferences. This action cannot be undone.'),
+        content: const Text(
+          'This will delete all your local app data including medications, reminders, and preferences. This action cannot be undone.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -1232,7 +1183,9 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Account'),
-        content: const Text('This will permanently delete your account and all associated data. This action cannot be undone.'),
+        content: const Text(
+          'This will permanently delete your account and all associated data. This action cannot be undone.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -1280,15 +1233,14 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Account deletion feature coming in next update'),
+                  content: Text(
+                    'Account deletion feature coming in next update',
+                  ),
                   backgroundColor: Colors.orange,
                 ),
               );
             },
-            child: const Text(
-              'Delete',
-              style: TextStyle(color: Colors.red),
-            ),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -1303,16 +1255,16 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
         content: SingleChildScrollView(
           child: Text(
             'MedMind Privacy Policy\n\n'
-                'We take your privacy seriously. This policy describes what personal information we collect and how we use it.\n\n'
-                'Data Collection:\n'
-                '• Basic profile information\n'
-                '• Medication and health data you enter\n'
-                '• App usage statistics (if enabled)\n\n'
-                'Data Usage:\n'
-                '• Provide medication reminders\n'
-                '• Improve app functionality\n'
-                '• Personalize your experience\n\n'
-                'We never sell your personal data to third parties.',
+            'We take your privacy seriously. This policy describes what personal information we collect and how we use it.\n\n'
+            'Data Collection:\n'
+            '• Basic profile information\n'
+            '• Medication and health data you enter\n'
+            '• App usage statistics (if enabled)\n\n'
+            'Data Usage:\n'
+            '• Provide medication reminders\n'
+            '• Improve app functionality\n'
+            '• Personalize your experience\n\n'
+            'We never sell your personal data to third parties.',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
         ),
@@ -1334,12 +1286,12 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
         content: SingleChildScrollView(
           child: Text(
             'MedMind Terms of Service\n\n'
-                'By using MedMind, you agree to these terms:\n\n'
-                '1. You are responsible for the accuracy of the health information you enter.\n'
-                '2. MedMind provides reminders but is not a substitute for professional medical advice.\n'
-                '3. You must maintain the security of your account credentials.\n'
-                '4. We may update these terms with notice to users.\n\n'
-                'Please consult healthcare professionals for medical decisions.',
+            'By using MedMind, you agree to these terms:\n\n'
+            '1. You are responsible for the accuracy of the health information you enter.\n'
+            '2. MedMind provides reminders but is not a substitute for professional medical advice.\n'
+            '3. You must maintain the security of your account credentials.\n'
+            '4. We may update these terms with notice to users.\n\n'
+            'Please consult healthcare professionals for medical decisions.',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
         ),
@@ -1361,14 +1313,14 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
         content: SingleChildScrollView(
           child: Text(
             'Data Processing Agreement\n\n'
-                'This agreement outlines how MedMind processes your personal data in compliance with privacy regulations.\n\n'
-                'Your Rights:\n'
-                '• Access your personal data\n'
-                '• Correct inaccurate data\n'
-                '• Request data deletion\n'
-                '• Export your data\n'
-                '• Opt-out of data processing\n\n'
-                'Contact us for any privacy-related concerns.',
+            'This agreement outlines how MedMind processes your personal data in compliance with privacy regulations.\n\n'
+            'Your Rights:\n'
+            '• Access your personal data\n'
+            '• Correct inaccurate data\n'
+            '• Request data deletion\n'
+            '• Export your data\n'
+            '• Opt-out of data processing\n\n'
+            'Contact us for any privacy-related concerns.',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
         ),
@@ -1383,5 +1335,4 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
   }
 }
 
-class TwoFactorLoading {
-}
+class TwoFactorLoading {}
