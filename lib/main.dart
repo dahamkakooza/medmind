@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 // Core imports
 import 'core/theme/app_theme.dart';
@@ -25,6 +27,7 @@ import 'features/medication/presentation/pages/medication_list_page.dart';
 import 'features/medication/presentation/pages/add_medication_page.dart';
 import 'features/medication/presentation/pages/medication_detail_page.dart';
 import 'features/medication/presentation/blocs/medication_bloc/medication_bloc.dart';
+import 'features/medication/domain/entities/medication_entity.dart';
 
 // Feature imports - Adherence
 import 'features/adherence/presentation/pages/adherence_history_page.dart';
@@ -34,6 +37,10 @@ import 'features/adherence/presentation/blocs/adherence_bloc/adherence_bloc.dart
 // Feature imports - Profile
 import 'features/profile/presentation/pages/profile_page.dart';
 import 'features/profile/presentation/blocs/profile_bloc/profile_bloc.dart';
+
+// Feature imports - Notifications
+import 'features/notifications/presentation/pages/notification_test_page.dart';
+import 'features/medication/presentation/pages/pending_doses_page.dart';
 
 // Repository implementations
 import 'features/auth/data/repositories/auth_repository_impl.dart';
@@ -85,8 +92,15 @@ void main() async {
     // Initialize Firebase
     await FirebaseConfig.initialize();
 
+    // Initialize timezone data for notifications
+    tz.initializeTimeZones();
+    tz.setLocalLocation(
+      tz.getLocation('America/New_York'),
+    ); // Set your timezone
+
     // Initialize notifications
     await NotificationUtils.initialize();
+    await NotificationUtils.requestPermissions();
 
     // Get SharedPreferences instance
     final sharedPreferences = await SharedPreferences.getInstance();
@@ -177,13 +191,30 @@ class MedMindApp extends StatelessWidget {
               )..add(AuthCheckRequested());
             },
           ),
+          BlocProvider<AdherenceBloc>(
+            create: (context) {
+              final adherenceRepo = context.read<AdherenceRepositoryImpl>();
+              return AdherenceBloc(
+                getAdherenceLogs: GetAdherenceLogs(adherenceRepo),
+                getAdherenceSummary: GetAdherenceSummary(adherenceRepo),
+                logMedicationTaken: adherence_log.LogMedicationTaken(
+                  adherenceRepo,
+                ),
+                exportAdherenceData: ExportAdherenceData(adherenceRepo),
+              );
+            },
+          ),
           BlocProvider<DashboardBloc>(
             create: (context) {
               final dashboardRepo = context.read<DashboardRepositoryImpl>();
+              final authRepo = context.read<AuthRepositoryImpl>();
+              final adherenceBloc = context.read<AdherenceBloc>();
               return DashboardBloc(
                 getTodayMedications: GetTodayMedications(dashboardRepo),
                 getAdherenceStats: GetAdherenceStats(dashboardRepo),
                 logMedicationTaken: LogMedicationTaken(dashboardRepo),
+                authRepository: authRepo,
+                adherenceBloc: adherenceBloc,
               );
             },
           ),
@@ -195,19 +226,6 @@ class MedMindApp extends StatelessWidget {
                 addMedication: AddMedication(medicationRepo),
                 updateMedication: UpdateMedication(medicationRepo),
                 deleteMedication: DeleteMedication(medicationRepo),
-              );
-            },
-          ),
-          BlocProvider<AdherenceBloc>(
-            create: (context) {
-              final adherenceRepo = context.read<AdherenceRepositoryImpl>();
-              return AdherenceBloc(
-                getAdherenceLogs: GetAdherenceLogs(adherenceRepo),
-                getAdherenceSummary: GetAdherenceSummary(adherenceRepo),
-                logMedicationTaken: adherence_log.LogMedicationTaken(
-                  adherenceRepo,
-                ),
-                exportAdherenceData: ExportAdherenceData(adherenceRepo),
               );
             },
           ),
@@ -269,6 +287,16 @@ class MedMindApp extends StatelessWidget {
                 return MaterialPageRoute(
                   builder: (_) => const AddMedicationPage(),
                 );
+              case '/edit-medication':
+                final medication = settings.arguments;
+                if (medication != null) {
+                  return MaterialPageRoute(
+                    builder: (_) => AddMedicationPage(
+                      medication: medication as MedicationEntity,
+                    ),
+                  );
+                }
+                return null;
               case '/medication-detail':
                 final medication = settings.arguments;
                 if (medication != null) {
@@ -308,21 +336,16 @@ class MedMindApp extends StatelessWidget {
                   ),
                 );
 
-              // Notifications placeholder
+              // Notifications
               case '/notifications':
                 return MaterialPageRoute(
-                  builder: (_) => Scaffold(
-                    appBar: AppBar(title: const Text('Notifications')),
-                    body: const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(24.0),
-                        child: Text(
-                          'Notifications page coming soon!',
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                  ),
+                  builder: (_) => const NotificationTestPage(),
+                );
+
+              // Pending Doses
+              case '/pending-doses':
+                return MaterialPageRoute(
+                  builder: (_) => const PendingDosesPage(),
                 );
 
               default:

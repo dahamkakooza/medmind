@@ -1,36 +1,78 @@
-
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
+import '../services/pending_dose_tracker.dart';
 
 class NotificationUtils {
   static final FlutterLocalNotificationsPlugin _notificationsPlugin =
-  FlutterLocalNotificationsPlugin();
+      FlutterLocalNotificationsPlugin();
 
   static bool _isInitialized = false;
 
   static Future<void> initialize() async {
     try {
       const AndroidInitializationSettings androidSettings =
-      AndroidInitializationSettings('@mipmap/ic_launcher');
+          AndroidInitializationSettings('@mipmap/ic_launcher');
 
       const DarwinInitializationSettings iosSettings =
-      DarwinInitializationSettings(
-        requestAlertPermission: true,
-        requestBadgePermission: true,
-        requestSoundPermission: true,
-      );
+          DarwinInitializationSettings(
+            requestAlertPermission: true,
+            requestBadgePermission: true,
+            requestSoundPermission: true,
+          );
 
       const InitializationSettings settings = InitializationSettings(
         android: androidSettings,
         iOS: iosSettings,
       );
 
-      await _notificationsPlugin.initialize(settings);
+      // Set up notification tap handler
+      await _notificationsPlugin.initialize(
+        settings,
+        onDidReceiveNotificationResponse: _onNotificationTapped,
+      );
+
       _isInitialized = true;
       print('Notification system initialized successfully');
     } catch (e) {
       print('Failed to initialize notifications: $e');
       _isInitialized = false;
+    }
+  }
+
+  static Future<void> _onNotificationTapped(
+    NotificationResponse response,
+  ) async {
+    // Handle notification tap
+    // Payload contains medication ID and name in format: "id|name"
+    print('Notification tapped: ${response.payload}');
+
+    if (response.payload != null && response.payload!.isNotEmpty) {
+      final parts = response.payload!.split('|');
+      if (parts.length >= 2) {
+        final medicationId = parts[0];
+        final medicationName = parts[1];
+
+        // Add to pending doses when notification is tapped
+        await _addToPendingDoses(medicationId, medicationName);
+      }
+    }
+    // TODO: Navigate to medication detail or pending doses page
+  }
+
+  /// Add a dose to pending doses tracker when notification fires
+  static Future<void> _addToPendingDoses(
+    String medicationId,
+    String medicationName,
+  ) async {
+    try {
+      await PendingDoseTracker.addPendingDose(
+        medicationId: medicationId,
+        medicationName: medicationName,
+        scheduledTime: DateTime.now(),
+      );
+      print('✅ Added pending dose for $medicationName');
+    } catch (e) {
+      print('❌ Failed to add pending dose: $e');
     }
   }
 
@@ -60,12 +102,10 @@ class NotificationUtils {
             importance: Importance.high,
             priority: Priority.high,
           ),
-          iOS: DarwinNotificationDetails(
-            sound: 'default',
-          ),
+          iOS: DarwinNotificationDetails(sound: 'default'),
         ),
         uiLocalNotificationDateInterpretation:
-        UILocalNotificationDateInterpretation.absoluteTime,
+            UILocalNotificationDateInterpretation.absoluteTime,
         matchDateTimeComponents: DateTimeComponents.time,
         payload: payload,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -86,7 +126,10 @@ class NotificationUtils {
     );
 
     if (scheduled.isBefore(now)) {
-      return tz.TZDateTime.from(scheduled.add(const Duration(days: 1)), tz.local);
+      return tz.TZDateTime.from(
+        scheduled.add(const Duration(days: 1)),
+        tz.local,
+      );
     }
 
     return tz.TZDateTime.from(scheduled, tz.local);
@@ -154,18 +197,16 @@ class NotificationUtils {
     try {
       await _notificationsPlugin
           .resolvePlatformSpecificImplementation<
-          IOSFlutterLocalNotificationsPlugin>()
-          ?.requestPermissions(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
+            IOSFlutterLocalNotificationsPlugin
+          >()
+          ?.requestPermissions(alert: true, badge: true, sound: true);
     } catch (e) {
       print('Failed to request permissions: $e');
     }
   }
 
-  static Future<List<PendingNotificationRequest>> getPendingNotifications() async {
+  static Future<List<PendingNotificationRequest>>
+  getPendingNotifications() async {
     if (!_isInitialized) return [];
 
     try {

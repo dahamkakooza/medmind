@@ -12,7 +12,9 @@ import '../widgets/barcode_scanner.dart';
 import '../../domain/entities/medication_entity.dart';
 
 class AddMedicationPage extends StatefulWidget {
-  const AddMedicationPage({super.key});
+  final MedicationEntity? medication; // For editing existing medication
+
+  const AddMedicationPage({super.key, this.medication});
 
   @override
   State<AddMedicationPage> createState() => _AddMedicationPageState();
@@ -25,8 +27,40 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
   final _instructionsController = TextEditingController();
 
   String _frequency = 'Once daily';
-  TimeOfDay _reminderTime = const TimeOfDay(hour: 8, minute: 0);
+  List<TimeOfDay> _reminderTimes = [const TimeOfDay(hour: 8, minute: 0)];
   bool _enableReminders = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // If editing, populate fields with existing medication data
+    if (widget.medication != null) {
+      _nameController.text = widget.medication!.name;
+      _dosageController.text = widget.medication!.dosage;
+      _instructionsController.text = widget.medication!.instructions ?? '';
+      _enableReminders = widget.medication!.times.isNotEmpty;
+      if (widget.medication!.times.isNotEmpty) {
+        _reminderTimes = widget.medication!.times;
+      }
+      // Set frequency based on times count
+      _frequency = _getFrequencyFromTimes(widget.medication!.times.length);
+    }
+  }
+
+  String _getFrequencyFromTimes(int timesCount) {
+    switch (timesCount) {
+      case 1:
+        return 'Once daily';
+      case 2:
+        return 'Twice daily';
+      case 3:
+        return 'Three times daily';
+      case 4:
+        return 'Four times daily';
+      default:
+        return 'Once daily';
+    }
+  }
 
   @override
   void dispose() {
@@ -44,41 +78,126 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
     );
   }
 
+  List<TimeOfDay> _getTimesForFrequency() {
+    if (!_enableReminders) return [];
+
+    // DEMO MODE: Use current time + offsets for easy testing
+    if (_frequency.contains('DEMO')) {
+      final now = DateTime.now();
+      final demoTime1 = now.add(const Duration(minutes: 1));
+      final demoTime2 = now.add(const Duration(minutes: 2));
+      final demoTime3 = now.add(const Duration(minutes: 3));
+
+      switch (_frequency) {
+        case 'DEMO: 1 min':
+          return [TimeOfDay(hour: demoTime1.hour, minute: demoTime1.minute)];
+        case 'DEMO: 1, 2, 3 min':
+          return [
+            TimeOfDay(hour: demoTime1.hour, minute: demoTime1.minute),
+            TimeOfDay(hour: demoTime2.hour, minute: demoTime2.minute),
+            TimeOfDay(hour: demoTime3.hour, minute: demoTime3.minute),
+          ];
+        default:
+          return [TimeOfDay(hour: demoTime1.hour, minute: demoTime1.minute)];
+      }
+    }
+
+    // NORMAL MODE: Standard times
+    switch (_frequency) {
+      case 'Once daily':
+        return [const TimeOfDay(hour: 8, minute: 0)];
+      case 'Twice daily':
+        return [
+          const TimeOfDay(hour: 8, minute: 0),
+          const TimeOfDay(hour: 20, minute: 0),
+        ];
+      case 'Three times daily':
+        return [
+          const TimeOfDay(hour: 8, minute: 0),
+          const TimeOfDay(hour: 14, minute: 0),
+          const TimeOfDay(hour: 20, minute: 0),
+        ];
+      case 'Four times daily':
+        return [
+          const TimeOfDay(hour: 8, minute: 0),
+          const TimeOfDay(hour: 12, minute: 0),
+          const TimeOfDay(hour: 16, minute: 0),
+          const TimeOfDay(hour: 20, minute: 0),
+        ];
+      case 'As needed':
+        return [];
+      case 'Weekly':
+        return [const TimeOfDay(hour: 8, minute: 0)];
+      default:
+        return [const TimeOfDay(hour: 8, minute: 0)];
+    }
+  }
+
   void _saveMedication() {
     if (_formKey.currentState!.validate()) {
       final now = DateTime.now();
-      final medication = MedicationEntity(
-        id: '',
-        userId: '', // Will be set by repository
-        name: _nameController.text.trim(),
-        dosage: _dosageController.text.trim(),
-        form: MedicationForm.tablet, // Default form
-        frequency: MedicationFrequency.daily, // Default frequency
-        times: _enableReminders ? [_reminderTime] : [],
-        days: [], // Empty for daily
-        startDate: now,
-        isActive: true,
-        instructions: _instructionsController.text.trim(),
-        createdAt: now,
-        updatedAt: now,
-      );
 
-      context.read<MedicationBloc>().add(
-        AddMedicationRequested(medication: medication),
-      );
+      if (widget.medication != null) {
+        // Update existing medication
+        final updatedMedication = MedicationEntity(
+          id: widget.medication!.id,
+          userId: widget.medication!.userId,
+          name: _nameController.text.trim(),
+          dosage: _dosageController.text.trim(),
+          form: widget.medication!.form,
+          frequency: widget.medication!.frequency,
+          times: _getTimesForFrequency(),
+          days: widget.medication!.days,
+          startDate: widget.medication!.startDate,
+          isActive: widget.medication!.isActive,
+          barcodeData: widget.medication!.barcodeData,
+          refillReminder: widget.medication!.refillReminder,
+          instructions: _instructionsController.text.trim(),
+          createdAt: widget.medication!.createdAt,
+          updatedAt: now,
+        );
+
+        context.read<MedicationBloc>().add(
+          UpdateMedicationRequested(medication: updatedMedication),
+        );
+      } else {
+        // Add new medication
+        final medication = MedicationEntity(
+          id: '',
+          userId: '', // Will be set by repository
+          name: _nameController.text.trim(),
+          dosage: _dosageController.text.trim(),
+          form: MedicationForm.tablet, // Default form
+          frequency: MedicationFrequency.daily, // Default frequency
+          times: _getTimesForFrequency(),
+          days: [], // Empty for daily
+          startDate: now,
+          isActive: true,
+          instructions: _instructionsController.text.trim(),
+          createdAt: now,
+          updatedAt: now,
+        );
+
+        context.read<MedicationBloc>().add(
+          AddMedicationRequested(medication: medication),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isEditing = widget.medication != null;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Medication'),
+        title: Text(isEditing ? 'Edit Medication' : 'Add Medication'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.qr_code_scanner),
-            onPressed: _scanBarcode,
-          ),
+          if (!isEditing)
+            IconButton(
+              icon: const Icon(Icons.qr_code_scanner),
+              onPressed: _scanBarcode,
+            ),
         ],
       ),
       body: MultiBlocListener(
@@ -86,17 +205,38 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
           BlocListener<MedicationBloc, MedicationState>(
             listener: (context, state) {
               if (state is MedicationAdded) {
+                // Navigate to dashboard and clear navigation stack
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/',
+                  (route) => false,
+                );
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('✅ Medication added successfully!'),
+                    backgroundColor: Colors.green,
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              }
+              if (state is MedicationUpdated) {
+                // Go back to previous screen (detail or list)
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Medication added successfully'),
+                    content: Text('✅ Medication updated successfully!'),
+                    backgroundColor: Colors.green,
+                    duration: Duration(seconds: 2),
                   ),
                 );
               }
               if (state is MedicationError) {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text(state.message)));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('❌ ${state.message}'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
               }
             },
           ),
@@ -108,10 +248,11 @@ class _AddMedicationPageState extends State<AddMedicationPage> {
           dosageController: _dosageController,
           instructionsController: _instructionsController,
           frequency: _frequency,
-          reminderTime: _reminderTime,
+          reminderTime: _reminderTimes.first,
           enableReminders: _enableReminders,
           onFrequencyChanged: (value) => setState(() => _frequency = value!),
-          onReminderTimeChanged: (time) => setState(() => _reminderTime = time),
+          onReminderTimeChanged: (time) =>
+              setState(() => _reminderTimes = [time]),
           onEnableRemindersChanged: (value) =>
               setState(() => _enableReminders = value),
           onSave: _saveMedication,

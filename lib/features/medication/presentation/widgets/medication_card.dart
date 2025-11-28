@@ -5,12 +5,14 @@ class MedicationCard extends StatelessWidget {
   final MedicationEntity medication;
   final VoidCallback? onTap;
   final VoidCallback? onTaken;
+  final VoidCallback? onDelete;
 
   const MedicationCard({
     super.key,
     required this.medication,
     this.onTap,
     this.onTaken,
+    this.onDelete,
   });
 
   @override
@@ -40,7 +42,9 @@ class MedicationCard extends StatelessWidget {
                     Text(
                       '${medication.dosage} • ${medication.frequency}',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withOpacity(0.7),
                       ),
                     ),
                     if (medication.enableReminders) ...[
@@ -55,9 +59,10 @@ class MedicationCard extends StatelessWidget {
                           const SizedBox(width: 4),
                           Text(
                             medication.reminderTime.format(context),
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
                           ),
                         ],
                       ),
@@ -71,6 +76,15 @@ class MedicationCard extends StatelessWidget {
                   onPressed: onTaken,
                   icon: const Icon(Icons.check_circle_outline),
                   tooltip: 'Mark as taken',
+                ),
+              ],
+              if (onDelete != null) ...[
+                const SizedBox(width: 8),
+                IconButton(
+                  onPressed: onDelete,
+                  icon: const Icon(Icons.delete_outline),
+                  tooltip: 'Delete medication',
+                  color: Colors.red,
                 ),
               ],
               const Icon(Icons.chevron_right),

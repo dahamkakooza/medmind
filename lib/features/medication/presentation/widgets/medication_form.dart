@@ -52,7 +52,7 @@ class MedicationForm extends StatelessWidget {
               },
             ),
             const SizedBox(height: 16),
-            
+
             TextFormField(
               controller: dosageController,
               decoration: const InputDecoration(
@@ -68,25 +68,47 @@ class MedicationForm extends StatelessWidget {
               },
             ),
             const SizedBox(height: 16),
-            
+
             DropdownButtonFormField<String>(
-              value: frequency,
+              initialValue: frequency,
               decoration: const InputDecoration(
                 labelText: 'Frequency',
                 border: OutlineInputBorder(),
               ),
               items: const [
-                DropdownMenuItem(value: 'Once daily', child: Text('Once daily')),
-                DropdownMenuItem(value: 'Twice daily', child: Text('Twice daily')),
-                DropdownMenuItem(value: 'Three times daily', child: Text('Three times daily')),
-                DropdownMenuItem(value: 'Four times daily', child: Text('Four times daily')),
+                // DEMO OPTIONS (for testing)
+                DropdownMenuItem(
+                  value: 'DEMO: 1 min',
+                  child: Text('🧪 DEMO: 1 min from now'),
+                ),
+                DropdownMenuItem(
+                  value: 'DEMO: 1, 2, 3 min',
+                  child: Text('🧪 DEMO: 1, 2, 3 min from now'),
+                ),
+                // NORMAL OPTIONS
+                DropdownMenuItem(
+                  value: 'Once daily',
+                  child: Text('Once daily'),
+                ),
+                DropdownMenuItem(
+                  value: 'Twice daily',
+                  child: Text('Twice daily'),
+                ),
+                DropdownMenuItem(
+                  value: 'Three times daily',
+                  child: Text('Three times daily'),
+                ),
+                DropdownMenuItem(
+                  value: 'Four times daily',
+                  child: Text('Four times daily'),
+                ),
                 DropdownMenuItem(value: 'As needed', child: Text('As needed')),
                 DropdownMenuItem(value: 'Weekly', child: Text('Weekly')),
               ],
               onChanged: onFrequencyChanged,
             ),
             const SizedBox(height: 16),
-            
+
             TextFormField(
               controller: instructionsController,
               decoration: const InputDecoration(
@@ -97,7 +119,7 @@ class MedicationForm extends StatelessWidget {
               maxLines: 3,
             ),
             const SizedBox(height: 24),
-            
+
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -109,30 +131,24 @@ class MedicationForm extends StatelessWidget {
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     const SizedBox(height: 12),
-                    
+
                     SwitchListTile(
                       title: const Text('Enable Reminders'),
                       value: enableReminders,
                       onChanged: onEnableRemindersChanged,
                       contentPadding: EdgeInsets.zero,
                     ),
-                    
+
                     if (enableReminders) ...[
                       const SizedBox(height: 8),
-                      ListTile(
-                        title: const Text('Reminder Time'),
-                        subtitle: Text(reminderTime.format(context)),
-                        trailing: const Icon(Icons.access_time),
-                        onTap: () => _selectTime(context),
-                        contentPadding: EdgeInsets.zero,
-                      ),
+                      _buildReminderTimesInfo(context),
                     ],
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 32),
-            
+
             ElevatedButton(
               onPressed: onSave,
               style: ElevatedButton.styleFrom(
@@ -146,13 +162,122 @@ class MedicationForm extends StatelessWidget {
     );
   }
 
-  Future<void> _selectTime(BuildContext context) async {
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: reminderTime,
+  Widget _buildReminderTimesInfo(BuildContext context) {
+    final times = _getTimesForFrequency();
+
+    if (times.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 8.0),
+        child: Text(
+          'No scheduled reminders for "As needed" medications',
+          style: TextStyle(fontStyle: FontStyle.italic),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Reminder Times:',
+          style: TextStyle(fontWeight: FontWeight.w500),
+        ),
+        const SizedBox(height: 8),
+        ...times.asMap().entries.map((entry) {
+          final index = entry.key;
+          final time = entry.value;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 4.0),
+            child: Row(
+              children: [
+                const Icon(Icons.access_time, size: 16),
+                const SizedBox(width: 8),
+                Text(
+                  '${_getDoseLabel(index, times.length)}: ${time.format(context)}',
+                ),
+              ],
+            ),
+          );
+        }),
+        const SizedBox(height: 8),
+        Text(
+          'Times are automatically set based on frequency',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            fontStyle: FontStyle.italic,
+            color: Colors.grey[600],
+          ),
+        ),
+      ],
     );
-    if (picked != null) {
-      onReminderTimeChanged(picked);
+  }
+
+  String _getDoseLabel(int index, int total) {
+    if (total == 1) return 'Daily dose';
+    if (total == 2) return index == 0 ? 'Morning' : 'Evening';
+    if (total == 3) {
+      if (index == 0) return 'Morning';
+      if (index == 1) return 'Afternoon';
+      return 'Evening';
+    }
+    if (total == 4) {
+      if (index == 0) return 'Morning';
+      if (index == 1) return 'Noon';
+      if (index == 2) return 'Afternoon';
+      return 'Evening';
+    }
+    return 'Dose ${index + 1}';
+  }
+
+  List<TimeOfDay> _getTimesForFrequency() {
+    // DEMO MODE
+    if (frequency.contains('DEMO')) {
+      final now = DateTime.now();
+      final demoTime1 = now.add(const Duration(minutes: 1));
+      final demoTime2 = now.add(const Duration(minutes: 2));
+      final demoTime3 = now.add(const Duration(minutes: 3));
+
+      switch (frequency) {
+        case 'DEMO: 1 min':
+          return [TimeOfDay(hour: demoTime1.hour, minute: demoTime1.minute)];
+        case 'DEMO: 1, 2, 3 min':
+          return [
+            TimeOfDay(hour: demoTime1.hour, minute: demoTime1.minute),
+            TimeOfDay(hour: demoTime2.hour, minute: demoTime2.minute),
+            TimeOfDay(hour: demoTime3.hour, minute: demoTime3.minute),
+          ];
+        default:
+          return [TimeOfDay(hour: demoTime1.hour, minute: demoTime1.minute)];
+      }
+    }
+
+    // NORMAL MODE
+    switch (frequency) {
+      case 'Once daily':
+        return [const TimeOfDay(hour: 8, minute: 0)];
+      case 'Twice daily':
+        return [
+          const TimeOfDay(hour: 8, minute: 0),
+          const TimeOfDay(hour: 20, minute: 0),
+        ];
+      case 'Three times daily':
+        return [
+          const TimeOfDay(hour: 8, minute: 0),
+          const TimeOfDay(hour: 14, minute: 0),
+          const TimeOfDay(hour: 20, minute: 0),
+        ];
+      case 'Four times daily':
+        return [
+          const TimeOfDay(hour: 8, minute: 0),
+          const TimeOfDay(hour: 12, minute: 0),
+          const TimeOfDay(hour: 16, minute: 0),
+          const TimeOfDay(hour: 20, minute: 0),
+        ];
+      case 'As needed':
+        return [];
+      case 'Weekly':
+        return [const TimeOfDay(hour: 8, minute: 0)];
+      default:
+        return [const TimeOfDay(hour: 8, minute: 0)];
     }
   }
 }

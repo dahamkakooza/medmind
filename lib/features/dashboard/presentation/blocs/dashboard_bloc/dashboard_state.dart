@@ -28,11 +28,15 @@ class DashboardLoaded extends DashboardState {
 
 class MedicationLoggedSuccess extends DashboardState {
   final String medicationId;
+  final String medicationName;
 
-  const MedicationLoggedSuccess({required this.medicationId});
+  const MedicationLoggedSuccess({
+    required this.medicationId,
+    required this.medicationName,
+  });
 
   @override
-  List<Object> get props => [medicationId];
+  List<Object> get props => [medicationId, medicationName];
 }
 
 class DashboardError extends DashboardState {

@@ -13,9 +13,13 @@ class RefreshDashboardData extends DashboardEvent {}
 
 class LogMedicationTakenEvent extends DashboardEvent {
   final String medicationId;
+  final String medicationName;
 
-  const LogMedicationTakenEvent({required this.medicationId});
+  const LogMedicationTakenEvent({
+    required this.medicationId,
+    required this.medicationName,
+  });
 
   @override
-  List<Object> get props => [medicationId];
+  List<Object> get props => [medicationId, medicationName];
 }

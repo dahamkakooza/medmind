@@ -7,6 +7,7 @@ import '../../domain/entities/medication_entity.dart';
 import '../../../adherence/domain/entities/adherence_log_entity.dart';
 import '../../../adherence/presentation/blocs/adherence_bloc/adherence_bloc.dart';
 import '../../../adherence/presentation/blocs/adherence_bloc/adherence_event.dart';
+import '../../../../core/services/pending_dose_tracker.dart';
 
 class MedicationDetailPage extends StatelessWidget {
   final MedicationEntity medication;
@@ -170,9 +171,11 @@ class MedicationDetailPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ElevatedButton.icon(
-          onPressed: () {
-            print('🔔 [MedicationDetail] Mark as taken button pressed for: ${medication.name}');
-            
+          onPressed: () async {
+            print(
+              '🔔 [MedicationDetail] Mark as taken button pressed for: ${medication.name}',
+            );
+
             final now = DateTime.now();
             final log = AdherenceLogEntity(
               id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -184,8 +187,15 @@ class MedicationDetailPage extends StatelessWidget {
               createdAt: now,
             );
 
-            context.read<AdherenceBloc>().add(LogMedicationTakenEvent(log: log));
-            
+            context.read<AdherenceBloc>().add(
+              LogMedicationTakenEvent(log: log),
+            );
+
+            // Remove from pending doses (decrements badge count)
+            await PendingDoseTracker.removePendingDose(
+              medicationId: medication.id,
+            );
+
             print('✅ [MedicationDetail] Medication logged as taken');
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
