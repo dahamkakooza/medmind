@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:medmind/core/constants/route_constants.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -16,7 +17,7 @@ class ProfilePage extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
-              // TODO: Navigate to settings
+              Navigator.pushNamed(context, RouteConstants.settings);
             },
           ),
         ],
@@ -68,7 +69,7 @@ class ProfilePage extends StatelessWidget {
               icon: Icons.person_outline,
               title: 'Edit Profile',
               onTap: () {
-                // TODO: Navigate to edit profile
+                Navigator.pushNamed(context, RouteConstants.editProfile);
               },
             ),
             _buildProfileOption(
@@ -76,7 +77,7 @@ class ProfilePage extends StatelessWidget {
               icon: Icons.notifications_outlined,
               title: 'Notifications',
               onTap: () {
-                // TODO: Navigate to notification settings
+                Navigator.pushNamed(context, RouteConstants.notifications);
               },
             ),
             _buildProfileOption(
@@ -84,7 +85,7 @@ class ProfilePage extends StatelessWidget {
               icon: Icons.security_outlined,
               title: 'Privacy & Security',
               onTap: () {
-                // TODO: Navigate to privacy settings
+                Navigator.pushNamed(context, RouteConstants.privacySecurity);
               },
             ),
             _buildProfileOption(
@@ -92,7 +93,7 @@ class ProfilePage extends StatelessWidget {
               icon: Icons.help_outline,
               title: 'Help & Support',
               onTap: () {
-                // TODO: Navigate to help
+                Navigator.pushNamed(context, RouteConstants.helpSupport);
               },
             ),
             _buildProfileOption(
@@ -100,7 +101,7 @@ class ProfilePage extends StatelessWidget {
               icon: Icons.info_outline,
               title: 'About',
               onTap: () {
-                // TODO: Navigate to about
+                Navigator.pushNamed(context, RouteConstants.about);
               },
             ),
             const SizedBox(height: 24),
@@ -150,6 +151,13 @@ class ProfilePage extends StatelessWidget {
                             backgroundColor: Colors.green,
                           ),
                         );
+
+                        // Navigate back to login page
+                        Navigator.pushNamedAndRemoveUntil(
+                            context,
+                            RouteConstants.login,
+                                (route) => false
+                        );
                       }
                     }
                   } catch (e) {
@@ -178,11 +186,11 @@ class ProfilePage extends StatelessWidget {
   }
 
   Widget _buildProfileOption(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-  }) {
+      BuildContext context, {
+        required IconData icon,
+        required String title,
+        required VoidCallback onTap,
+      }) {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
