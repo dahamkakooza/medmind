@@ -36,6 +36,11 @@ import 'features/adherence/presentation/blocs/adherence_bloc/adherence_bloc.dart
 
 // Feature imports - Profile
 import 'features/profile/presentation/pages/profile_page.dart';
+import 'features/profile/presentation/pages/edit_profile_page.dart';
+import 'features/profile/presentation/pages/about_page.dart';
+import 'features/profile/presentation/pages/help_support_page.dart';
+import 'features/profile/presentation/pages/privacy_security_page.dart';
+import 'features/profile/presentation/pages/settings_page.dart';
 import 'features/profile/presentation/blocs/profile_bloc/profile_bloc.dart';
 
 // Feature imports - Notifications
@@ -327,21 +332,26 @@ class MedMindApp extends StatelessWidget {
               // Profile routes
               case '/profile':
                 return MaterialPageRoute(builder: (_) => const ProfilePage());
-              case '/settings':
+              case '/profile/edit':
                 return MaterialPageRoute(
-                  builder: (_) => Scaffold(
-                    appBar: AppBar(title: const Text('Settings')),
-                    body: const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(24.0),
-                        child: Text(
-                          'Settings page coming soon!',
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                  ),
+                  builder: (_) => const EditProfilePage(),
                 );
+              case '/profile/notifications':
+                return MaterialPageRoute(
+                  builder: (_) => const NotificationTestPage(),
+                );
+              case '/profile/privacy-security':
+                return MaterialPageRoute(
+                  builder: (_) => const PrivacySecurityPage(),
+                );
+              case '/profile/help-support':
+                return MaterialPageRoute(
+                  builder: (_) => const HelpSupportPage(),
+                );
+              case '/profile/about':
+                return MaterialPageRoute(builder: (_) => const AboutPage());
+              case '/settings':
+                return MaterialPageRoute(builder: (_) => const SettingsPage());
 
               // Notifications
               case '/notifications':
