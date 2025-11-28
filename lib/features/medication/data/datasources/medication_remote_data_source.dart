@@ -31,15 +31,22 @@ class MedicationRemoteDataSourceImpl implements MedicationRemoteDataSource {
   @override
   Future<List<MedicationModel>> getMedications(String userId) async {
     try {
+      // Temporary: Removed orderBy to avoid composite index requirement
+      // TODO: Re-enable orderBy once Firestore index is built
       final querySnapshot = await _medicationsCollection
           .where(FirebaseConstants.userIdField, isEqualTo: userId)
           .where(FirebaseConstants.isActiveField, isEqualTo: true)
-          .orderBy(FirebaseConstants.createdAtField, descending: true)
+          // .orderBy(FirebaseConstants.createdAtField, descending: true)
           .get();
 
-      return querySnapshot.docs
+      // Sort in memory as a temporary workaround
+      final medications = querySnapshot.docs
           .map((doc) => MedicationModel.fromDocument(doc))
           .toList();
+
+      medications.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+      return medications;
     } on FirebaseException catch (e) {
       throw _handleFirebaseException(e);
     } catch (e) {
@@ -191,15 +198,22 @@ class MedicationRemoteDataSourceImpl implements MedicationRemoteDataSource {
   @override
   Stream<List<MedicationModel>> watchMedications(String userId) {
     try {
+      // Temporary: Removed orderBy to avoid composite index requirement
+      // TODO: Re-enable orderBy once Firestore index is built
       return _medicationsCollection
           .where(FirebaseConstants.userIdField, isEqualTo: userId)
           .where(FirebaseConstants.isActiveField, isEqualTo: true)
-          .orderBy(FirebaseConstants.createdAtField, descending: true)
+          // .orderBy(FirebaseConstants.createdAtField, descending: true)
           .snapshots()
           .map((querySnapshot) {
-            return querySnapshot.docs
+            // Sort in memory as a temporary workaround
+            final medications = querySnapshot.docs
                 .map((doc) => MedicationModel.fromDocument(doc))
                 .toList();
+
+            medications.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+            return medications;
           })
           .handleError((error) {
             if (error is FirebaseException) {
