@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/auth_bloc.dart';
@@ -64,130 +63,123 @@ class _LoginPageState extends State<LoginPage> {
           return LoadingOverlay(
             isLoading: state is SignInLoading || state is GoogleSignInLoading,
             message: 'Signing in...',
-            child: SafeArea(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24.0),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Logo and Title
-                      _buildHeader(),
-                      const SizedBox(height: 48),
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Logo and Title
+                    _buildHeader(),
+                    const SizedBox(height: 48),
 
-                      // Email Field
-                      CustomTextField(
-                        label: 'Email',
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        focusNode: _emailFocusNode,
-                        textInputAction: TextInputAction.next,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your email';
-                          }
-                          if (!RegExp(
-                            r'^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+',
-                          ).hasMatch(value)) {
-                            return 'Please enter a valid email';
-                          }
-                          return null;
-                        },
-                        onEditingComplete: () {
-                          _passwordFocusNode.requestFocus();
-                        },
-                      ),
-                      const SizedBox(height: 16),
+                    // Email Field
+                    CustomTextField(
+                      label: 'Email',
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      focusNode: _emailFocusNode,
+                      textInputAction: TextInputAction.next,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your email';
+                        }
+                        if (!RegExp(r'^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+')
+                            .hasMatch(value)) {
+                          return 'Please enter a valid email';
+                        }
+                        return null;
+                      },
+                      onEditingComplete: () {
+                        _passwordFocusNode.requestFocus();
+                      },
+                    ),
+                    const SizedBox(height: 16),
 
-                      // Password Field
-                      PasswordTextField(
-                        label: 'Password',
-                        controller: _passwordController,
-                        focusNode: _passwordFocusNode,
-                        textInputAction: TextInputAction.done,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your password';
-                          }
-                          if (value.length < 6) {
-                            return 'Password must be at least 6 characters';
-                          }
-                          return null;
-                        },
-                        onEditingComplete: _submitForm,
-                      ),
-                      const SizedBox(height: 8),
+                    // Password Field
+                    PasswordTextField(
+                      label: 'Password',
+                      controller: _passwordController,
+                      focusNode: _passwordFocusNode,
+                      textInputAction: TextInputAction.done,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your password';
+                        }
+                        if (value.length < 6) {
+                          return 'Password must be at least 6 characters';
+                        }
+                        return null;
+                      },
+                      onEditingComplete: _submitForm,
+                    ),
+                    const SizedBox(height: 8),
 
-                      // Forgot Password
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: _navigateToForgotPassword,
-                          child: Text(
-                            'Forgot Password?',
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
+                    // Forgot Password
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: _navigateToForgotPassword,
+                        child: Text(
+                          'Forgot Password?',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 24),
+                    ),
+                    const SizedBox(height: 24),
 
-                      // Sign In Button
-                      custom_buttons.PrimaryButton(
-                        text: 'Sign In',
-                        onPressed: _submitForm,
-                      ),
-                      const SizedBox(height: 16),
+                    // Sign In Button
+                    custom_buttons.PrimaryButton(
+                      text: 'Sign In',
+                      onPressed: _submitForm,
+                    ),
+                    const SizedBox(height: 16),
 
-                      // Google Sign In
-                      custom_buttons.CustomOutlinedButton(
-                        text: 'Continue with Google',
-                        onPressed: () {
-                          context.read<AuthBloc>().add(GoogleSignInRequested());
-                        },
-                        icon: Icons.g_mobiledata,
-                      ),
-                      const SizedBox(height: 24),
+                    // Google Sign In
+                    custom_buttons.CustomOutlinedButton(
+                      text: 'Continue with Google',
+                      onPressed: () {
+                        context.read<AuthBloc>().add(GoogleSignInRequested());
+                      },
+                      icon: Icons.g_mobiledata,
+                    ),
+                    const SizedBox(height: 24),
 
-                      // Sign Up Link
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "Don't have an account?",
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                          const SizedBox(width: 8),
-                          GestureDetector(
-                            onTap: _navigateToRegister,
-                            child: Text(
-                              'Sign Up',
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.primary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                    // Sign Up Link
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Don't have an account?",
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                        const SizedBox(width: 8),
+                        GestureDetector(
+                          onTap: _navigateToRegister,
+                          child: Text(
+                            'Sign Up',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.primary,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                        ],
-                      ),
-
-                      // Error Display
-                      if (state is SignInError) ...[
-                        const SizedBox(height: 16),
-                        ErrorDisplayWidget(
-                          message: state.message,
-                          onRetry: _submitForm,
                         ),
                       ],
+                    ),
+
+                    // Error Display
+                    if (state is SignInError) ...[
+                      const SizedBox(height: 16),
+                      ErrorDisplayWidget(
+                        message: state.message,
+                        onRetry: _submitForm,
+                      ),
                     ],
-                  ),
+                  ],
                 ),
               ),
             ),
@@ -217,9 +209,9 @@ class _LoginPageState extends State<LoginPage> {
         const SizedBox(height: 24),
         Text(
           'Welcome to MedMind',
-          style: Theme.of(
-            context,
-          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
         ),
         const SizedBox(height: 8),
         Text(

@@ -110,7 +110,7 @@ class AdherenceBloc extends Bloc<AdherenceEvent, AdherenceState> {
     print('💊 [AdherenceBloc] Processing LogMedicationTakenEvent');
     print('   Medication ID: ${event.log.medicationId}');
     print('   Status: ${event.log.status}');
-    
+
     final result = await logMedicationTaken(
       LogMedicationTakenParams(
         userId: event.log.userId,
@@ -119,7 +119,7 @@ class AdherenceBloc extends Bloc<AdherenceEvent, AdherenceState> {
         notes: null,
       ),
     );
-    
+
     result.fold(
       (failure) {
         print('❌ [AdherenceBloc] Failed to log medication: ${failure.toString()}');

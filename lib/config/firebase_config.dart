@@ -1,80 +1,54 @@
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 
 class FirebaseConfig {
   static Future<void> initialize() async {
-    final firebaseOptions = _getFirebaseOptions();
-    _logFirebaseOptions(firebaseOptions);
-
     try {
-      await Firebase.initializeApp(options: firebaseOptions);
-
+      await Firebase.initializeApp(
+        options: _getFirebaseOptions(),
+      );
       if (kDebugMode) {
-        print('🔥 Firebase initialized successfully');
+        print('Firebase initialized successfully');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Firebase initialization error: $e');
+        print('Firebase initialization error: $e');
       }
       rethrow;
     }
   }
 
   static FirebaseOptions _getFirebaseOptions() {
-<<<<<<< HEAD
-    // Platform-specific Firebase configuration
+    // TODO: Replace with your Firebase project configuration
+    // Get this from Firebase Console > Project Settings > Your apps
     if (kIsWeb) {
       return const FirebaseOptions(
-        apiKey: 'AIzaSyBxGDxjBp_-Ar1_WHeivlwAkv97K_P8u3I',
-        appId: '1:1018558923142:web:7fa35f0c4a8bdb034b2c07',
-        messagingSenderId: '1018558923142',
-        projectId: 'medmind-c6af2',
-        authDomain: 'medmind-c6af2.firebaseapp.com',
-        storageBucket: 'medmind-c6af2.firebasestorage.app',
+        apiKey: 'YOUR_WEB_API_KEY',
+        appId: 'YOUR_WEB_APP_ID',
+        messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
+        projectId: 'YOUR_PROJECT_ID',
+        authDomain: 'YOUR_PROJECT_ID.firebaseapp.com',
+        storageBucket: 'YOUR_PROJECT_ID.appspot.com',
       );
-    }
-
-    // ANDROID CONFIG (Your actual values)
-    if (defaultTargetPlatform == TargetPlatform.android) {
+    } else if (defaultTargetPlatform == TargetPlatform.android) {
       return const FirebaseOptions(
-        apiKey: 'AIzaSyAY_Eq7xuD6m5d6sgB3JNlGoJ_NHYhHkDM',
-        appId: '1:1018558923142:android:48fe15c8b98ffb6d4b2c07',
-        messagingSenderId: '1018558923142',
-        projectId: 'medmind-c6af2',
-        storageBucket: 'medmind-c6af2.firebasestorage.app',
+        apiKey: 'YOUR_ANDROID_API_KEY',
+        appId: 'YOUR_ANDROID_APP_ID',
+        messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
+        projectId: 'YOUR_PROJECT_ID',
+        storageBucket: 'YOUR_PROJECT_ID.appspot.com',
       );
-    }
-
-    // iOS CONFIG (Fill later if needed)
-    if (defaultTargetPlatform == TargetPlatform.iOS) {
+    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
       return const FirebaseOptions(
         apiKey: 'YOUR_IOS_API_KEY',
         appId: 'YOUR_IOS_APP_ID',
         messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-        projectId: 'medmind-c6af2',
-        storageBucket: 'medmind-c6af2.firebasestorage.app',
+        projectId: 'YOUR_PROJECT_ID',
+        storageBucket: 'YOUR_PROJECT_ID.appspot.com',
         iosBundleId: 'com.example.medmind',
       );
     }
-
-    throw UnsupportedError(
-      'Platform ${defaultTargetPlatform.name} is not supported by FirebaseConfig',
-    );
-  }
-
-  static void _logFirebaseOptions(FirebaseOptions options) {
-    if (!kDebugMode) {
-      return;
-    }
-
-    print('🔍 Firebase configuration in use:');
-    print('  • Project ID: ${options.projectId}');
-    print('  • App ID: ${options.appId}');
-    print('  • API Key: ${options.apiKey}');
-    print('  • Auth Domain: ${options.authDomain ?? 'N/A'}');
-    print('  • Storage Bucket: ${options.storageBucket ?? 'N/A'}');
-    print('  • Messaging Sender ID: ${options.messagingSenderId ?? 'N/A'}');
-
+    
+    throw UnsupportedError('Platform not supported');
   }
 }

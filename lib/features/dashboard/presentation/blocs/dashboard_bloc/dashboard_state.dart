@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
-import '../../../../medication/domain/entities/medication_entity.dart';
-import '../../../domain/entities/adherence_entity.dart';
-import '../../../domain/entities/adherence_entity.dart'; // Fixed path
+import '../../../medication/domain/entities/medication_entity.dart';
+import '../../domain/entities/adherence_entity.dart';
 
 abstract class DashboardState extends Equatable {
   const DashboardState();
@@ -29,15 +28,11 @@ class DashboardLoaded extends DashboardState {
 
 class MedicationLoggedSuccess extends DashboardState {
   final String medicationId;
-  final String medicationName;
 
-  const MedicationLoggedSuccess({
-    required this.medicationId,
-    required this.medicationName,
-  });
+  const MedicationLoggedSuccess({required this.medicationId});
 
   @override
-  List<Object> get props => [medicationId, medicationName];
+  List<Object> get props => [medicationId];
 }
 
 class DashboardError extends DashboardState {
