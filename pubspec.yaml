@@ -22,12 +22,12 @@ dependencies:
   get_it: ^7.7.0
   injectable: ^2.4.4
   
-  # Firebase
-  firebase_core: ^3.6.0
-  firebase_auth: ^5.3.1
-  cloud_firestore: ^5.4.4
-  firebase_storage: ^12.3.4
-  google_sign_in: ^6.2.2
+  # Firebase - COMPATIBLE VERSIONS
+  firebase_core: ^2.24.0
+  firebase_auth: ^4.18.0
+  cloud_firestore: ^4.15.0
+  firebase_storage: ^11.5.0
+  google_sign_in: ^6.1.5
   
   # Functional Programming
   dartz: ^0.10.1
@@ -36,13 +36,10 @@ dependencies:
   http: ^1.2.2
   
   # Local Storage
-  shared_preferences: ^2.3.2
+  shared_preferences: ^2.2.2
   
   # Notifications
   flutter_local_notifications: ^17.2.3
-  
-  # Barcode Scanner
-  # mobile_scanner: ^5.2.3
   
   # Charts & Visualization
   fl_chart: ^0.69.0
@@ -53,15 +50,9 @@ dependencies:
   # Permissions
   permission_handler: ^11.3.1
 
-  # UPDATED DEPENDENCIES WITH COMPATIBLE VERSIONS:
-  # Image Picker for profile pictures
-  image_picker: ^1.1.2
-  
-  # URL Launcher for help & support links
-  url_launcher: ^6.2.2
-  
-  # Package Info for About page (UPDATED VERSION)
-  # package_info_plus: ^4.3.0  # This version exists and is compatible
+  # Profile Features - COMPATIBLE VERSIONS
+  image_picker: ^0.8.7+5
+  url_launcher: ^6.1.7
 
 dev_dependencies:
   flutter_test:

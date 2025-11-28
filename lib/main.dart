@@ -1,4 +1,3 @@
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart' hide RouterConfig;
@@ -23,6 +22,8 @@ import 'features/dashboard/presentation/blocs/dashboard_bloc/dashboard_bloc.dart
 import 'features/medication/presentation/blocs/barcode_bloc/barcode_bloc.dart';
 import 'features/medication/presentation/blocs/medication_bloc/medication_bloc.dart';
 import 'features/profile/presentation/blocs/profile_bloc/profile_bloc.dart';
+import 'features/profile/presentation/blocs/profile_bloc/profile_event.dart';
+import 'features/profile/presentation/blocs/profile_bloc/profile_state.dart';
 import 'injection_container.dart';
 
 void main() async {
@@ -55,7 +56,7 @@ class MedMindApp extends StatelessWidget {
         BlocProvider(create: (context) => getIt<DashboardBloc>()),
 
         // Profile BLoC
-        BlocProvider(create: (context) => getIt<ProfileBloc>()),
+        BlocProvider(create: (context) => getIt<ProfileBloc>()..add(LoadPreferences())), // ✅ Load preferences on startup
 
         // Adherence BLoC
         BlocProvider(create: (context) => getIt<AdherenceBloc>()),
@@ -63,15 +64,30 @@ class MedMindApp extends StatelessWidget {
         // Barcode BLoC
         BlocProvider(create: (context) => getIt<BarcodeBloc>()),
       ],
-      child: MaterialApp(
-        title: AppConstants.appName,
-        theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
-        themeMode: ThemeMode.system,
-        debugShowCheckedModeBanner: false,
-        onGenerateRoute: RouterConfig.generateRoute,
-        initialRoute: RouteConstants.splash,
-        navigatorKey: getIt<GlobalKey<NavigatorState>>(),
+      child: BlocBuilder<ProfileBloc, ProfileState>(
+        builder: (context, state) {
+          // Determine current theme based on preferences
+          ThemeMode currentThemeMode = ThemeMode.system;
+
+          if (state is PreferencesLoaded) {
+            currentThemeMode = state.preferences.themeMode;
+            print('🎨 App theme updated to: ${state.preferences.themeMode}');
+          } else if (state is PreferencesUpdated) {
+            currentThemeMode = state.preferences.themeMode;
+            print('🎨 App theme updated to: ${state.preferences.themeMode}');
+          }
+
+          return MaterialApp(
+            title: AppConstants.appName,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: currentThemeMode, // ✅ Dynamic theme that updates
+            debugShowCheckedModeBanner: false,
+            onGenerateRoute: RouterConfig.generateRoute,
+            initialRoute: RouteConstants.splash,
+            navigatorKey: getIt<GlobalKey<NavigatorState>>(),
+          );
+        },
       ),
     );
   }
