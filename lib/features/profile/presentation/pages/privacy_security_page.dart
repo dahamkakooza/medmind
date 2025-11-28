@@ -895,7 +895,11 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
   }
 
   // Placeholder for verification dialog
-  void _showVerificationDialog(BuildContext context, String verificationId, String phoneNumber) {
+  void _showVerificationDialog(
+    BuildContext context,
+    String verificationId,
+    String phoneNumber,
+  ) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -911,166 +915,7 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
     );
   }
 
-  // Placeholder method to avoid errors
-  void _showPlaceholderDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Coming Soon'),
-                  content: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const Text('Enable 2FA'),
-                            const Spacer(),
-                            Switch(
-                              value: _2faEnabled,
-                              onChanged: (value) =>
-                                  setState(() => _2faEnabled = value),
-                            ),
-                          ],
-                        ),
-                        if (_2faEnabled) ...[
-                          const SizedBox(height: 16),
-                          const Text(
-                            'Add an extra layer of security to your account. '
-                            'You\'ll need to enter a verification code sent to your phone '
-                            'when signing in.',
-                            style: TextStyle(fontSize: 14, color: Colors.grey),
-                          ),
-                          const SizedBox(height: 16),
-                          TextField(
-                            controller: phoneController,
-                            decoration: const InputDecoration(
-                              labelText: 'Phone Number',
-                              border: OutlineInputBorder(),
-                              hintText: '+1234567890',
-                              prefixText: '+',
-                            ),
-                            keyboardType: TextInputType.phone,
-                          ),
-                          const SizedBox(height: 8),
-                          if (state is TwoFactorLoading)
-                            const LinearProgressIndicator(),
-                          if (state is TwoFactorError)
-                            Text(
-                              state.message,
-                              style: const TextStyle(color: Colors.red),
-                            ),
-                        ] else ...[
-                          const SizedBox(height: 16),
-                          const Text(
-                            'Two-factor authentication is currently disabled. '
-                            'Enable it for enhanced account security.',
-                            style: TextStyle(fontSize: 14, color: Colors.grey),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel'),
-                    ),
-                    if (_2faEnabled)
-                      ElevatedButton(
-                        onPressed: state is TwoFactorLoading
-                            ? null
-                            : () {
-                                context.read<ProfileBloc>().add(
-                                  TwoFactorAuthRequested(
-                                    enable: true,
-                                    phoneNumber: phoneController.text,
-                                  ),
-                                );
-                              },
-                        child: const Text('Enable 2FA'),
-                      ),
-                  ],
-                );
-              },
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  // NEW: Verification Code Dialog for 2FA
-  void _showVerificationDialog(
-    BuildContext context,
-    String verificationId,
-    String phoneNumber,
-  ) {
-    final codeController = TextEditingController();
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => BlocBuilder<ProfileBloc, ProfileState>(
-        builder: (context, state) {
-          return AlertDialog(
-            title: const Text('Verify Phone Number'),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Enter the 6-digit code sent to $phoneNumber',
-                    style: const TextStyle(fontSize: 14),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: codeController,
-                    decoration: const InputDecoration(
-                      labelText: 'Verification Code',
-                      border: OutlineInputBorder(),
-                      hintText: '123456',
-                    ),
-                    keyboardType: TextInputType.number,
-                    maxLength: 6,
-                  ),
-                  const SizedBox(height: 8),
-                  if (state is TwoFactorLoading)
-                    const LinearProgressIndicator(),
-                  if (state is TwoFactorError)
-                    Text(
-                      state.message,
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-              ElevatedButton(
-                onPressed: state is TwoFactorLoading
-                    ? null
-                    : () {
-                        context.read<ProfileBloc>().add(
-                          VerifyTwoFactorCode(
-                            code: codeController.text,
-                            verificationId: verificationId,
-                          ),
-                        );
-                      },
-                child: const Text('Verify'),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  // Rest of the existing methods remain the same...
+  // Helper methods for dialogs
   void _showAnalyticsDialog(BuildContext context, bool enabled) {
     showDialog(
       context: context,
