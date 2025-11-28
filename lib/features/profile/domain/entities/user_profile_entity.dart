@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import '../../../../core/entities/emergency_contact_entity.dart'; // ADD THIS IMPORT
+import '../../../../core/entities/emergency_contact_entity.dart'; //
 
 class UserProfileEntity extends Equatable {
   final String id;

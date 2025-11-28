@@ -1,3 +1,4 @@
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dartz/dartz.dart';
 import '../../../../core/usecases/usecase.dart'; // ADDED IMPORT
@@ -30,10 +31,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<SendEmailVerificationRequested>(_onSendEmailVerificationRequested);
   }
 
-  void _onSignInRequested(
-    SignInRequested event,
-    Emitter<AuthState> emit,
-  ) async {
+  void _onSignInRequested(SignInRequested event, Emitter<AuthState> emit) async {
     emit(SignInLoading());
 
     final result = await signInWithEmailAndPassword.call(
@@ -43,10 +41,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     _handleAuthResult(result, emit);
   }
 
-  void _onSignUpRequested(
-    SignUpRequested event,
-    Emitter<AuthState> emit,
-  ) async {
+  void _onSignUpRequested(SignUpRequested event, Emitter<AuthState> emit) async {
     emit(SignUpLoading());
 
     final result = await signUp.call(
@@ -60,10 +55,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     _handleAuthResult(result, emit, isSignUp: true);
   }
 
-  void _onGoogleSignInRequested(
-    GoogleSignInRequested event,
-    Emitter<AuthState> emit,
-  ) async {
+  void _onGoogleSignInRequested(GoogleSignInRequested event, Emitter<AuthState> emit) async {
     emit(GoogleSignInLoading());
 
     final result = await signInWithGoogle.call(const NoParams()); // ADDED const
@@ -71,64 +63,58 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     _handleAuthResult(result, emit);
   }
 
-  void _onSignOutRequested(
-    SignOutRequested event,
-    Emitter<AuthState> emit,
-  ) async {
+  void _onSignOutRequested(SignOutRequested event, Emitter<AuthState> emit) async {
     final result = await signOut.call(const NoParams()); // ADDED const
 
     result.fold(
-      (failure) =>
-          emit(AuthError(message: failure.message, code: failure.code)),
-      (_) => emit(Unauthenticated()),
+          (failure) => emit(AuthError(
+        message: failure.message,
+        code: failure.code,
+      )),
+          (_) => emit(Unauthenticated()),
     );
   }
 
-  void _onPasswordResetRequested(
-    PasswordResetRequested event,
-    Emitter<AuthState> emit,
-  ) async {
+  void _onPasswordResetRequested(PasswordResetRequested event, Emitter<AuthState> emit) async {
     emit(PasswordResetLoading());
     // Implementation will be added when repository is implemented
     await Future.delayed(const Duration(seconds: 2)); // Temporary
     emit(PasswordResetSuccess(email: event.email));
   }
 
-  void _onAuthCheckRequested(
-    AuthCheckRequested event,
-    Emitter<AuthState> emit,
-  ) {
+  void _onAuthCheckRequested(AuthCheckRequested event, Emitter<AuthState> emit) {
     // Implementation will be added when repository is implemented
     // For now, emit unauthenticated
     emit(Unauthenticated());
   }
 
-  void _onSendEmailVerificationRequested(
-    SendEmailVerificationRequested event,
-    Emitter<AuthState> emit,
-  ) {
+  void _onSendEmailVerificationRequested(SendEmailVerificationRequested event, Emitter<AuthState> emit) {
     // Implementation will be added when repository is implemented
     emit(EmailVerificationSent());
   }
 
   void _handleAuthResult(
-    Either<Failure, dynamic> result,
-    Emitter<AuthState> emit, {
-    bool isSignUp = false,
-  }) {
+      Either<Failure, dynamic> result,
+      Emitter<AuthState> emit, {
+        bool isSignUp = false,
+      }) {
     result.fold(
-      (failure) {
+          (failure) {
         if (isSignUp) {
-          emit(SignUpError(message: failure.message, code: failure.code));
+          emit(SignUpError(
+            message: failure.message,
+            code: failure.code,
+          ));
         } else {
-          emit(SignInError(message: failure.message, code: failure.code));
+          emit(SignInError(
+            message: failure.message,
+            code: failure.code,
+          ));
         }
       },
-      (user) {
+          (user) {
         if (isSignUp) {
           emit(SignUpSuccess(user: user));
-          // Also emit Authenticated so AuthWrapper shows dashboard
-          emit(Authenticated(user: user));
         } else {
           emit(Authenticated(user: user));
         }

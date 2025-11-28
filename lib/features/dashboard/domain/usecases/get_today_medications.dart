@@ -3,7 +3,10 @@ import '../../../../core/errors/failures.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../../../medication/domain/entities/medication_entity.dart';
 import '../repositories/dashboard_repository.dart';
+import 'get_adherence_stats.dart';
+import 'package:injectable/injectable.dart';
 
+@injectable
 class GetTodayMedications implements UseCase<List<MedicationEntity>, NoParams> {
   final DashboardRepository repository;
 

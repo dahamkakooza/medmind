@@ -22,31 +22,6 @@ class _MedicationListPageState extends State<MedicationListPage> {
     context.read<MedicationBloc>().add(GetMedicationsRequested());
   }
 
-  void _showDeleteDialog(BuildContext context, medication) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete Medication'),
-        content: Text('Are you sure you want to delete ${medication.name}?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              context.read<MedicationBloc>().add(
-                DeleteMedicationRequested(medicationId: medication.id),
-              );
-              Navigator.pop(dialogContext);
-            },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -59,69 +34,54 @@ class _MedicationListPageState extends State<MedicationListPage> {
           ),
         ],
       ),
-      body: BlocListener<MedicationBloc, MedicationState>(
-        listener: (context, state) {
-          if (state is MedicationDeleted) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text('Medication deleted')));
-            // Reload medications after deletion
-            context.read<MedicationBloc>().add(GetMedicationsRequested());
+      body: BlocBuilder<MedicationBloc, MedicationState>(
+        builder: (context, state) {
+          if (state is MedicationLoading) {
+            return const LoadingWidget();
           }
-        },
-        child: BlocBuilder<MedicationBloc, MedicationState>(
-          builder: (context, state) {
-            if (state is MedicationLoading) {
-              return const LoadingWidget();
-            }
-
-            if (state is MedicationError) {
-              return ErrorDisplayWidget(
-                message: state.message,
-                onRetry: () => context.read<MedicationBloc>().add(
-                  GetMedicationsRequested(),
-                ),
+          
+          if (state is MedicationError) {
+            return ErrorDisplayWidget(
+              message: state.message,
+              onRetry: () => context.read<MedicationBloc>().add(GetMedicationsRequested()),
+            );
+          }
+          
+          if (state is MedicationLoaded) {
+            if (state.medications.isEmpty) {
+              return EmptyStateWidget(
+                icon: Icons.medication,
+                title: 'No medications yet',
+                message: 'Add your first medication to get started',
+                actionText: 'Add Medication',
+                onAction: () => Navigator.pushNamed(context, '/add-medication'),
               );
             }
-
-            if (state is MedicationLoaded) {
-              if (state.medications.isEmpty) {
-                return EmptyStateWidget(
-                  icon: Icons.medication,
-                  title: 'No medications yet',
-                  description: 'Add your first medication to get started',
-                  actionText: 'Add Medication',
-                  onAction: () =>
-                      Navigator.pushNamed(context, '/add-medication'),
-                );
-              }
-
-              return RefreshIndicator(
-                onRefresh: () async {
-                  context.read<MedicationBloc>().add(GetMedicationsRequested());
+            
+            return RefreshIndicator(
+              onRefresh: () async {
+                context.read<MedicationBloc>().add(GetMedicationsRequested());
+              },
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: state.medications.length,
+                itemBuilder: (context, index) {
+                  final medication = state.medications[index];
+                  return MedicationCard(
+                    medication: medication,
+                    onTap: () => Navigator.pushNamed(
+                      context,
+                      '/medication-detail',
+                      arguments: medication,
+                    ),
+                  );
                 },
-                child: ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: state.medications.length,
-                  itemBuilder: (context, index) {
-                    final medication = state.medications[index];
-                    return MedicationCard(
-                      medication: medication,
-                      onTap: () => Navigator.pushNamed(
-                        context,
-                        '/medication-detail',
-                        arguments: medication,
-                      ),
-                      onDelete: () => _showDeleteDialog(context, medication),
-                    );
-                  },
-                ),
-              );
-            }
-
-            return const SizedBox.shrink();
-          },
-        ),
+              ),
+            );
+          }
+          
+          return const SizedBox.shrink();
+        },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.pushNamed(context, '/add-medication'),

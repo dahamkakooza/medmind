@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/errors/exceptions.dart';
+import 'package:injectable/injectable.dart';
 import '../../../../core/errors/failures.dart';
 import '../../domain/entities/adherence_log_entity.dart';
 import '../../domain/repositories/adherence_repository.dart';
@@ -9,6 +10,7 @@ import '../datasources/adherence_remote_data_source.dart';
 import '../models/adherence_log_model.dart';
 import '../../../dashboard/data/models/adherence_model.dart';
 
+@LazySingleton(as: AdherenceRepository)
 class AdherenceRepositoryImpl implements AdherenceRepository {
   final AdherenceRemoteDataSource remoteDataSource;
   final FirebaseAuth firebaseAuth;

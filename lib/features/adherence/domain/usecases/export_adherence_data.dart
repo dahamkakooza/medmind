@@ -2,7 +2,9 @@ import 'package:dartz/dartz.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../repositories/adherence_repository.dart';
+import 'package:injectable/injectable.dart';
 
+@injectable
 class ExportAdherenceData implements UseCase<String, ExportAdherenceDataParams> {
   final AdherenceRepository repository;
 

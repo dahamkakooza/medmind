@@ -3,9 +3,10 @@ import '../../../../core/errors/failures.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../entities/adherence_log_entity.dart';
 import '../repositories/adherence_repository.dart';
+import 'package:injectable/injectable.dart';
 
-class GetAdherenceLogs
-    implements UseCase<List<AdherenceLogEntity>, GetAdherenceLogsParams> {
+@injectable
+class GetAdherenceLogs implements UseCase<List<AdherenceLogEntity>, GetAdherenceLogsParams> {
   final AdherenceRepository repository;
 
   GetAdherenceLogs(this.repository);

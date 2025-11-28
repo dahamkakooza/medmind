@@ -2,9 +2,10 @@ import 'package:dartz/dartz.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../repositories/adherence_repository.dart';
+import 'package:injectable/injectable.dart';
 
-class GetAdherenceSummary
-    implements UseCase<Map<String, dynamic>, GetAdherenceSummaryParams> {
+@injectable
+class GetAdherenceSummary implements UseCase<Map<String, dynamic>, NoParams> {
   final AdherenceRepository repository;
 
   GetAdherenceSummary(this.repository);

@@ -1,6 +1,11 @@
-import 'package:flutter/material.dart';
+
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart' hide RouterConfig;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+<<<<<<< HEAD
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -121,11 +126,81 @@ void main() async {
       MedMindApp(
         sharedPreferences: sharedPreferences,
         initializationError: e.toString(),
+=======
+
+// Core imports
+import 'core/theme/app_theme.dart';
+import 'core/constants/app_constants.dart';
+import 'core/constants/route_constants.dart';
+import 'core/utils/notification_utils.dart';
+
+// Configuration
+import 'config/router_config.dart';
+
+// Service Locator
+import 'features/adherence/presentation/blocs/adherence_bloc/adherence_bloc.dart';
+import 'features/auth/presentation/blocs/auth_bloc.dart';
+import 'features/auth/presentation/blocs/auth_event.dart';
+import 'features/dashboard/presentation/blocs/dashboard_bloc/dashboard_bloc.dart';
+import 'features/medication/presentation/blocs/barcode_bloc/barcode_bloc.dart';
+import 'features/medication/presentation/blocs/medication_bloc/medication_bloc.dart';
+import 'features/profile/presentation/blocs/profile_bloc/profile_bloc.dart';
+import 'injection_container.dart';
+
+void main() async {
+  // Ensure Flutter binding is initialized
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Configure dependency injection
+  configureDependencies();
+
+  // Initialize core services
+  await _initializeCoreServices();
+
+  runApp(const MedMindApp());
+}
+
+class MedMindApp extends StatelessWidget {
+  const MedMindApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiBlocProvider(
+      providers: [
+        // Auth BLoC
+        BlocProvider(create: (context) => getIt<AuthBloc>()..add(AuthCheckRequested())),
+
+        // Medication BLoC
+        BlocProvider(create: (context) => getIt<MedicationBloc>()),
+
+        // Dashboard BLoC
+        BlocProvider(create: (context) => getIt<DashboardBloc>()),
+
+        // Profile BLoC
+        BlocProvider(create: (context) => getIt<ProfileBloc>()),
+
+        // Adherence BLoC
+        BlocProvider(create: (context) => getIt<AdherenceBloc>()),
+
+        // Barcode BLoC
+        BlocProvider(create: (context) => getIt<BarcodeBloc>()),
+      ],
+      child: MaterialApp(
+        title: AppConstants.appName,
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.system,
+        debugShowCheckedModeBanner: false,
+        onGenerateRoute: RouterConfig.generateRoute,
+        initialRoute: RouteConstants.splash,
+        navigatorKey: getIt<GlobalKey<NavigatorState>>(),
+>>>>>>> 834de40 (added some more pages in profile)
       ),
     );
   }
 }
 
+<<<<<<< HEAD
 class MedMindApp extends StatelessWidget {
   final SharedPreferences sharedPreferences;
   final String? initializationError;

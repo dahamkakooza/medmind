@@ -18,9 +18,19 @@ abstract class AdherenceRemoteDataSource {
     required DateTime startDate,
     required DateTime endDate,
   });
-  Stream<List<AdherenceLogModel>> watchAdherenceLogs(String userId);
+
+  Future<AdherenceLogModel> logMedicationTaken({
+    required String medicationId,
+    required DateTime takenAt,
+    String? notes,
+  });
+
+  Future<Map<String, dynamic>> getAdherenceSummary();
+
+  Future<String> exportAdherenceData(String format);
 }
 
+@LazySingleton(as: AdherenceRemoteDataSource)
 class AdherenceRemoteDataSourceImpl implements AdherenceRemoteDataSource {
   final FirebaseFirestore firestore;
   final FirebaseAuth firebaseAuth;

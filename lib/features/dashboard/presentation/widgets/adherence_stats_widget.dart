@@ -35,11 +35,11 @@ class AdherenceStatsWidget extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-
+            
             // Weekly adherence percentage
             _buildAdherenceCircle(context),
             const SizedBox(height: 20),
-
+            
             // Stats grid
             Row(
               children: [
@@ -48,7 +48,7 @@ class AdherenceStatsWidget extends StatelessWidget {
                     context,
                     'This Week',
                     '${adherenceStats.weeklyPercentage.toStringAsFixed(0)}%',
-                    Icons.calendar_view_week,
+                    Icons.calendar_week,
                     _getAdherenceColor(adherenceStats.weeklyPercentage),
                   ),
                 ),
@@ -97,7 +97,7 @@ class AdherenceStatsWidget extends StatelessWidget {
   Widget _buildAdherenceCircle(BuildContext context) {
     final percentage = adherenceStats.weeklyPercentage;
     final color = _getAdherenceColor(percentage);
-
+    
     return Center(
       child: SizedBox(
         width: 120,
@@ -107,9 +107,7 @@ class AdherenceStatsWidget extends StatelessWidget {
             CircularProgressIndicator(
               value: percentage / 100,
               strokeWidth: 8,
-              backgroundColor: Theme.of(
-                context,
-              ).colorScheme.surfaceContainerHighest,
+              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
               valueColor: AlwaysStoppedAnimation<Color>(color),
             ),
             Center(
@@ -126,9 +124,7 @@ class AdherenceStatsWidget extends StatelessWidget {
                   Text(
                     'This Week',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onSurface.withOpacity(0.6),
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                     ),
                   ),
                 ],
