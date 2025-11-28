@@ -15,6 +15,8 @@ class MedicationRepositoryImpl implements MedicationRepository {
     required this.localDataSource,
   });
 
+  get localDataSource => null;
+
   @override
   Future<Either<Failure, List<MedicationEntity>>> getMedications() async {
     try {

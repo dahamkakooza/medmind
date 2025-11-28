@@ -1382,3 +1382,6 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
     );
   }
 }
+
+class TwoFactorLoading {
+}

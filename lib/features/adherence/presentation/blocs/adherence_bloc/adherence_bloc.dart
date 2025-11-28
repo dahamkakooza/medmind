@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
@@ -47,7 +48,7 @@ class AdherenceBloc extends Bloc<AdherenceEvent, AdherenceState> {
     );
     result.fold(
       (failure) =>
-          emit(const AdherenceError(message: 'Failed to load adherence logs')),
+          emit(AdherenceError(message: 'Failed to load adherence logs')),
       (logs) => emit(AdherenceLogsLoaded(logs: logs)),
     );
   }
@@ -69,7 +70,7 @@ class AdherenceBloc extends Bloc<AdherenceEvent, AdherenceState> {
     );
     result.fold(
       (failure) => emit(
-        const AdherenceError(message: 'Failed to load adherence summary'),
+        AdherenceError(message: 'Failed to load adherence summary'),
       ),
       (summary) => emit(
         AdherenceSummaryLoaded(
@@ -98,7 +99,7 @@ class AdherenceBloc extends Bloc<AdherenceEvent, AdherenceState> {
     );
     result.fold(
       (failure) =>
-          emit(const AdherenceError(message: 'Failed to log medication')),
+          emit(AdherenceError(message: 'Failed to log medication')),
       (log) => emit(MedicationLoggedSuccess(log: log)),
     );
   }
@@ -123,7 +124,7 @@ class AdherenceBloc extends Bloc<AdherenceEvent, AdherenceState> {
     result.fold(
       (failure) {
         print('❌ [AdherenceBloc] Failed to log medication: ${failure.toString()}');
-        emit(const AdherenceError(message: 'Failed to log medication'));
+        emit(AdherenceError(message: 'Failed to log medication'));
       },
       (log) {
         print('✅ [AdherenceBloc] Medication logged successfully');
@@ -140,7 +141,7 @@ class AdherenceBloc extends Bloc<AdherenceEvent, AdherenceState> {
       ExportAdherenceDataParams(format: event.format),
     );
     result.fold(
-      (failure) => emit(const AdherenceError(message: 'Failed to export data')),
+      (failure) => emit(AdherenceError(message: 'Failed to export data')),
       (filePath) =>
           emit(AdherenceDataExported(filePath: filePath, format: event.format)),
     );
