@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "257346834376",
+    "project_id": "medmind-ca71d",
+    "storage_bucket": "medmind-ca71d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:257346834376:android:7c186269d766fe4d9b7afd",
+        "android_client_info": {
+          "package_name": "com.example.medmind"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "257346834376-pnr99475jv1ptf08jqm5ehk9gd78u08n.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.medmind",
+            "certificate_hash": "a04df46e31f679dcda094fb48aad44dbc6d30e75"
+          }
+        },
+        {
+          "client_id": "257346834376-nnaun4r72bnfmlockj8nvnrdcekk24gi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_b2w_sJ7_JJRWcoxqcDv1g_hHj0nS8Ew"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "257346834376-nnaun4r72bnfmlockj8nvnrdcekk24gi.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
