@@ -16,7 +16,7 @@ class AdherenceAnalyticsPage extends StatefulWidget {
 
 class _AdherenceAnalyticsPageState extends State<AdherenceAnalyticsPage> {
   String _selectedPeriod = 'Last 30 Days';
-  
+
   @override
   void initState() {
     super.initState();
@@ -53,14 +53,14 @@ class _AdherenceAnalyticsPageState extends State<AdherenceAnalyticsPage> {
           if (state is AdherenceLoading) {
             return const LoadingWidget();
           }
-          
+
           if (state is AdherenceError) {
             return ErrorDisplayWidget(
               message: state.message,
               onRetry: _loadAnalytics,
             );
           }
-          
+
           if (state is AdherenceSummaryLoaded) {
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16),
@@ -70,11 +70,11 @@ class _AdherenceAnalyticsPageState extends State<AdherenceAnalyticsPage> {
                   // Period selector
                   _buildPeriodInfo(context),
                   const SizedBox(height: 24),
-                  
-                  // Key metrics
+
+                  // Key metrics - USING REAL DATA FROM STATE
                   _buildKeyMetrics(context, state),
                   const SizedBox(height: 24),
-                  
+
                   // Adherence chart
                   Text(
                     'Adherence Trend',
@@ -88,18 +88,18 @@ class _AdherenceAnalyticsPageState extends State<AdherenceAnalyticsPage> {
                     data: state.chartData,
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Insights
                   _buildInsights(context, state),
                   const SizedBox(height: 24),
-                  
+
                   // Export options
                   _buildExportOptions(context),
                 ],
               ),
             );
           }
-          
+
           return const SizedBox.shrink();
         },
       ),
@@ -159,7 +159,7 @@ class _AdherenceAnalyticsPageState extends State<AdherenceAnalyticsPage> {
                 'Overall Adherence',
                 '${(state.overallAdherence * 100).toStringAsFixed(0)}%',
                 Icons.trending_up,
-                Colors.green,
+                _getAdherenceColor(state.overallAdherence),
               ),
             ),
             const SizedBox(width: 12),
@@ -203,12 +203,12 @@ class _AdherenceAnalyticsPageState extends State<AdherenceAnalyticsPage> {
   }
 
   Widget _buildMetricCard(
-    BuildContext context,
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
+      BuildContext context,
+      String title,
+      String value,
+      IconData icon,
+      Color color,
+      ) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -288,12 +288,12 @@ class _AdherenceAnalyticsPageState extends State<AdherenceAnalyticsPage> {
   }
 
   Widget _buildInsightItem(
-    BuildContext context,
-    IconData icon,
-    String title,
-    String description,
-    Color color,
-  ) {
+      BuildContext context,
+      IconData icon,
+      String title,
+      String description,
+      Color color,
+      ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -342,8 +342,8 @@ class _AdherenceAnalyticsPageState extends State<AdherenceAnalyticsPage> {
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Exporting to PDF...')),
+                  context.read<AdherenceBloc>().add(
+                    ExportAdherenceDataRequested(format: 'pdf'),
                   );
                 },
                 icon: const Icon(Icons.picture_as_pdf),
@@ -354,8 +354,8 @@ class _AdherenceAnalyticsPageState extends State<AdherenceAnalyticsPage> {
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Exporting to CSV...')),
+                  context.read<AdherenceBloc>().add(
+                    ExportAdherenceDataRequested(format: 'csv'),
                   );
                 },
                 icon: const Icon(Icons.table_chart),
@@ -366,5 +366,11 @@ class _AdherenceAnalyticsPageState extends State<AdherenceAnalyticsPage> {
         ),
       ],
     );
+  }
+
+  Color _getAdherenceColor(double percentage) {
+    if (percentage >= 90) return Colors.green;
+    if (percentage >= 70) return Colors.orange;
+    return Colors.red;
   }
 }

@@ -66,17 +66,21 @@ class AuthError extends AuthState {
 }
 
 class SignInError extends AuthError {
-  const SignInError({required super.message, required super.code});
+  const SignInError({required String message, required String code})
+      : super(message: message, code: code);
 }
 
 class SignUpError extends AuthError {
-  const SignUpError({required super.message, required super.code});
+  const SignUpError({required String message, required String code})
+      : super(message: message, code: code);
 }
 
 class GoogleSignInError extends AuthError {
-  const GoogleSignInError({required super.message, required super.code});
+  const GoogleSignInError({required String message, required String code})
+      : super(message: message, code: code);
 }
 
 class PasswordResetError extends AuthError {
-  const PasswordResetError({required super.message, required super.code});
+  const PasswordResetError({required String message, required String code})
+      : super(message: message, code: code);
 }

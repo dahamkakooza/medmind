@@ -1,135 +1,77 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:timezone/data/latest_all.dart' as tz;
-import 'package:timezone/timezone.dart' as tz;
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart' hide RouterConfig;
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:injectable/injectable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Core imports
 import 'core/theme/app_theme.dart';
+import 'core/constants/app_constants.dart';
+import 'core/constants/route_constants.dart';
 import 'core/utils/notification_utils.dart';
-import 'config/firebase_config.dart';
 
-// Feature imports - Auth
+// Configuration
+import 'config/router_config.dart';
+
+// Service Locator
+import 'features/adherence/presentation/blocs/adherence_bloc/adherence_bloc.dart';
 import 'features/auth/presentation/blocs/auth_bloc.dart';
 import 'features/auth/presentation/blocs/auth_event.dart';
-import 'features/auth/presentation/blocs/auth_state.dart';
-import 'features/auth/presentation/pages/login_page.dart';
-import 'features/auth/presentation/pages/register_page.dart';
-
-// Feature imports - Dashboard
-import 'features/dashboard/presentation/pages/dashboard_page.dart';
 import 'features/dashboard/presentation/blocs/dashboard_bloc/dashboard_bloc.dart';
-
-// Feature imports - Medication
-import 'features/medication/presentation/pages/medication_list_page.dart';
-import 'features/medication/presentation/pages/add_medication_page.dart';
-import 'features/medication/presentation/pages/medication_detail_page.dart';
+import 'features/medication/presentation/blocs/barcode_bloc/barcode_bloc.dart';
 import 'features/medication/presentation/blocs/medication_bloc/medication_bloc.dart';
-import 'features/medication/domain/entities/medication_entity.dart';
-
-// Feature imports - Adherence
-import 'features/adherence/presentation/pages/adherence_history_page.dart';
-import 'features/adherence/presentation/pages/adherence_analytics_page.dart';
-import 'features/adherence/presentation/blocs/adherence_bloc/adherence_bloc.dart';
-
-// Feature imports - Profile
-import 'features/profile/presentation/pages/profile_page.dart';
-import 'features/profile/presentation/pages/edit_profile_page.dart';
-import 'features/profile/presentation/pages/about_page.dart';
-import 'features/profile/presentation/pages/help_support_page.dart';
-import 'features/profile/presentation/pages/privacy_security_page.dart';
-import 'features/profile/presentation/pages/settings_page.dart';
 import 'features/profile/presentation/blocs/profile_bloc/profile_bloc.dart';
-import 'features/profile/presentation/blocs/profile_bloc/profile_event.dart';
-import 'features/profile/presentation/blocs/profile_bloc/profile_state.dart'
-    as profile_state;
-
-// Feature imports - Notifications
-import 'features/notifications/presentation/pages/notification_test_page.dart';
-import 'features/medication/presentation/pages/pending_doses_page.dart';
-
-// Repository implementations
-import 'features/auth/data/repositories/auth_repository_impl.dart';
-import 'features/medication/data/repositories/medication_repository_impl.dart';
-import 'features/adherence/data/repositories/adherence_repository_impl.dart';
-import 'features/dashboard/data/repositories/dashboard_repository_impl.dart';
-import 'features/profile/data/repositories/profile_repository_impl.dart';
-
-// Data sources
-import 'features/medication/data/datasources/medication_remote_data_source.dart';
-import 'features/adherence/data/datasources/adherence_remote_data_source.dart';
-import 'features/dashboard/data/datasources/dashboard_remote_data_source.dart';
-import 'features/profile/data/datasources/profile_local_data_source.dart';
-
-// Use cases - Auth
-import 'features/auth/domain/usecases/sign_in_with_email_and_password.dart';
-import 'features/auth/domain/usecases/sign_in_with_google.dart';
-import 'features/auth/domain/usecases/sign_up.dart';
-import 'features/auth/domain/usecases/sign_out.dart';
-
-// Use cases - Dashboard
-import 'features/dashboard/domain/usecases/get_today_medications.dart';
-import 'features/dashboard/domain/usecases/get_adherence_stats.dart';
-import 'features/dashboard/domain/usecases/log_medication_taken.dart';
-
-// Use cases - Medication
-import 'features/medication/domain/usecases/get_medications.dart';
-import 'features/medication/domain/usecases/add_medication.dart';
-import 'features/medication/domain/usecases/update_medication.dart';
-import 'features/medication/domain/usecases/delete_medication.dart';
-
-// Use cases - Adherence
-import 'features/adherence/domain/usecases/get_adherence_logs.dart';
-import 'features/adherence/domain/usecases/get_adherence_summary.dart';
-import 'features/adherence/domain/usecases/log_medication_taken.dart'
-    as adherence_log;
-import 'features/adherence/domain/usecases/export_adherence_data.dart';
-
-// Use cases - Profile
-import 'features/profile/domain/usecases/get_user_preferences.dart';
-import 'features/profile/domain/usecases/save_user_preferences.dart';
-import 'features/profile/domain/usecases/update_theme_mode.dart';
-import 'features/profile/domain/usecases/update_notifications.dart';
+import 'injection_container.dart';
 
 void main() async {
+  // Ensure Flutter binding is initialized
   WidgetsFlutterBinding.ensureInitialized();
 
-  try {
-    // Initialize Firebase
-    await FirebaseConfig.initialize();
+  // Configure dependency injection
+  configureDependencies();
 
-    // Initialize timezone data for notifications
-    tz.initializeTimeZones();
-    // Use device's local timezone
-    final String timeZoneName = DateTime.now().timeZoneName;
-    try {
-      tz.setLocalLocation(tz.getLocation(timeZoneName));
-      print('📍 Using timezone: $timeZoneName');
-    } catch (e) {
-      // Fallback to UTC if device timezone not found
-      tz.setLocalLocation(tz.UTC);
-      print('⚠️ Could not find timezone $timeZoneName, using UTC');
-    }
+  // Initialize core services
+  await _initializeCoreServices();
 
-    // Initialize notifications
-    await NotificationUtils.initialize();
-    await NotificationUtils.requestPermissions();
+  runApp(const MedMindApp());
+}
 
-    // Get SharedPreferences instance
-    final sharedPreferences = await SharedPreferences.getInstance();
+class MedMindApp extends StatelessWidget {
+  const MedMindApp({super.key});
 
-    runApp(MedMindApp(sharedPreferences: sharedPreferences));
-  } catch (e) {
-    // If Firebase initialization fails, still run the app but show error
-    print('Firebase initialization failed: $e');
-    final sharedPreferences = await SharedPreferences.getInstance();
-    runApp(
-      MedMindApp(
-        sharedPreferences: sharedPreferences,
-        initializationError: e.toString(),
+  @override
+  Widget build(BuildContext context) {
+    return MultiBlocProvider(
+      providers: [
+        // Auth BLoC
+        BlocProvider(create: (context) => getIt<AuthBloc>()..add(AuthCheckRequested())),
+
+        // Medication BLoC
+        BlocProvider(create: (context) => getIt<MedicationBloc>()),
+
+        // Dashboard BLoC
+        BlocProvider(create: (context) => getIt<DashboardBloc>()),
+
+        // Profile BLoC
+        BlocProvider(create: (context) => getIt<ProfileBloc>()),
+
+        // Adherence BLoC
+        BlocProvider(create: (context) => getIt<AdherenceBloc>()),
+
+        // Barcode BLoC
+        BlocProvider(create: (context) => getIt<BarcodeBloc>()),
+      ],
+      child: MaterialApp(
+        title: AppConstants.appName,
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.system,
+        debugShowCheckedModeBanner: false,
+        onGenerateRoute: RouterConfig.generateRoute,
+        initialRoute: RouteConstants.splash,
+        navigatorKey: getIt<GlobalKey<NavigatorState>>(),
       ),
     );
   }

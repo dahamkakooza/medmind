@@ -1,3 +1,4 @@
+
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_preferences_model.dart';
@@ -6,6 +7,7 @@ abstract class ProfileLocalDataSource {
   Future<UserPreferencesModel> getPreferences();
   Future<void> savePreferences(UserPreferencesModel preferences);
   Future<void> clearPreferences();
+  Future<bool> hasStoredPreferences();
 }
 
 class ProfileLocalDataSourceImpl implements ProfileLocalDataSource {
@@ -19,13 +21,16 @@ class ProfileLocalDataSourceImpl implements ProfileLocalDataSource {
     try {
       final jsonString = sharedPreferences.getString(_preferencesKey);
       if (jsonString == null) {
+        print('📱 No stored preferences found, returning defaults');
         return UserPreferencesModel.defaultPreferences;
       }
 
       final jsonMap = json.decode(jsonString) as Map<String, dynamic>;
-      return UserPreferencesModel.fromJson(jsonMap);
+      final preferences = UserPreferencesModel.fromJson(jsonMap);
+      print('📱 Loaded preferences: ${preferences.themeMode}, ${preferences.language}');
+      return preferences;
     } catch (e) {
-      // If there's any error reading preferences, return defaults
+      print('❌ Error loading preferences: $e, returning defaults');
       return UserPreferencesModel.defaultPreferences;
     }
   }
@@ -35,7 +40,9 @@ class ProfileLocalDataSourceImpl implements ProfileLocalDataSource {
     try {
       final jsonString = json.encode(preferences.toJson());
       await sharedPreferences.setString(_preferencesKey, jsonString);
+      print('💾 Preferences saved: ${preferences.themeMode}, ${preferences.language}');
     } catch (e) {
+      print('❌ Failed to save preferences: $e');
       throw Exception('Failed to save preferences: $e');
     }
   }
@@ -44,8 +51,15 @@ class ProfileLocalDataSourceImpl implements ProfileLocalDataSource {
   Future<void> clearPreferences() async {
     try {
       await sharedPreferences.remove(_preferencesKey);
+      print('🗑️ Preferences cleared');
     } catch (e) {
+      print('❌ Failed to clear preferences: $e');
       throw Exception('Failed to clear preferences: $e');
     }
+  }
+
+  @override
+  Future<bool> hasStoredPreferences() async {
+    return sharedPreferences.containsKey(_preferencesKey);
   }
 }

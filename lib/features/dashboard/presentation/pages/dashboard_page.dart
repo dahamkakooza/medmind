@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../widgets/today_medications_widget.dart';
@@ -8,7 +9,7 @@ import '../blocs/dashboard_bloc/dashboard_event.dart';
 import '../blocs/dashboard_bloc/dashboard_state.dart';
 import '../../../../core/widgets/loading_widget.dart';
 import '../../../../core/widgets/error_widget.dart';
-import '../../../../core/services/pending_dose_tracker.dart';
+import '../../../../core/constants/route_constants.dart'; // ADD THIS IMPORT
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -66,88 +67,85 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
           ],
         ),
-        body: BlocBuilder<DashboardBloc, DashboardState>(
-          builder: (context, state) {
-            if (state is DashboardLoading) {
-              return const LoadingWidget();
-            }
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_outlined),
+            onPressed: () => Navigator.pushNamed(context, RouteConstants.notifications), // FIXED
+          ),
+          IconButton(
+            icon: const Icon(Icons.person_outline),
+            onPressed: () => Navigator.pushNamed(context, RouteConstants.profile), // FIXED
+          ),
+        ],
+      ),
+      body: BlocBuilder<DashboardBloc, DashboardState>(
+        builder: (context, state) {
+          if (state is DashboardLoading) {
+            return const LoadingWidget();
+          }
 
-            if (state is DashboardError) {
-              return ErrorDisplayWidget(
-                message: state.message,
-                onRetry: _loadDashboardData,
-              );
-            }
+          if (state is DashboardError) {
+            return ErrorDisplayWidget(
+              message: state.message,
+              onRetry: _loadDashboardData,
+            );
+          }
 
-            if (state is DashboardLoaded) {
-              return RefreshIndicator(
-                onRefresh: () async => _loadDashboardData(),
-                child: SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Quick Actions
-                      QuickActionsWidget(
-                        onAddMedication: () =>
-                            Navigator.pushNamed(context, '/add-medication'),
-                        onViewMedications: () =>
-                            Navigator.pushNamed(context, '/medications'),
-                        onViewHistory: () =>
-                            Navigator.pushNamed(context, '/adherence-history'),
-                      ),
-                      const SizedBox(height: 24),
+          if (state is DashboardLoaded) {
+            return RefreshIndicator(
+              onRefresh: () async => _loadDashboardData(),
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Quick Actions
+                    QuickActionsWidget(
+                      onAddMedication: () => Navigator.pushNamed(context, RouteConstants.addMedication), // FIXED
+                      onViewMedications: () => Navigator.pushNamed(context, RouteConstants.medicationList), // FIXED
+                      onViewHistory: () => Navigator.pushNamed(context, RouteConstants.adherenceHistory), // FIXED
+                    ),
+                    const SizedBox(height: 24),
 
-                      // Notification Summary
-                      _buildNotificationSummary(),
-                      const SizedBox(height: 24),
+                    // Today's Medications
+                    Text(
+                      'Today\'s Medications',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TodayMedicationsWidget(
+                      medications: state.todayMedications,
+                      onMedicationTaken: (medication) {
+                        context.read<DashboardBloc>().add(
+                          LogMedicationTaken(medicationId: medication.id),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 24),
 
-                      // Today's Medications
-                      Text(
-                        'Today\'s Medications',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                    // Adherence Stats
+                    Text(
+                      'Your Progress',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
                       ),
-                      const SizedBox(height: 12),
-                      TodayMedicationsWidget(
-                        medications: state.todayMedications,
-                        onMedicationTaken: (medication) {
-                          context.read<DashboardBloc>().add(
-                            LogMedicationTakenEvent(
-                              medicationId: medication.id,
-                              medicationName: medication.name,
-                            ),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Adherence Stats
-                      Text(
-                        'Your Progress',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      AdherenceStatsWidget(
-                        adherenceStats: state.adherenceStats,
-                        onViewDetails: () => Navigator.pushNamed(
-                          context,
-                          '/adherence-analytics',
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 12),
+                    AdherenceStatsWidget(
+                      adherenceStats: state.adherenceStats,
+                      onViewDetails: () => Navigator.pushNamed(context, RouteConstants.adherenceAnalytics), // FIXED
+                    ),
+                  ],
                 ),
-              );
-            }
+              ),
+            );
+          }
 
-            return const SizedBox.shrink();
-          },
-        ),
+          return const SizedBox.shrink();
+        },
       ),
     );
   }

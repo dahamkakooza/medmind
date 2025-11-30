@@ -1,9 +1,11 @@
 import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../entities/user_entity.dart';
 import '../repositories/auth_repository.dart';
 
+@injectable
 class SignInWithEmailAndPassword implements UseCase<UserEntity, SignInParams> {
   final AuthRepository repository;
 
@@ -22,5 +24,5 @@ class SignInParams {
   final String email;
   final String password;
 
-  SignInParams({required this.email, required this.password});
+  const SignInParams({required this.email, required this.password});
 }

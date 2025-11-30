@@ -19,6 +19,7 @@ abstract class DashboardRemoteDataSource {
   Stream<AdherenceModel> watchAdherenceStats(String userId);
 }
 
+@LazySingleton(as: DashboardRemoteDataSource) // ADD THIS
 class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
   final FirebaseFirestore firestore;
   final FirebaseAuth firebaseAuth;

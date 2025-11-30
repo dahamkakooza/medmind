@@ -61,4 +61,6 @@ class AdherenceLogEntity extends Equatable {
     createdAt,
     deviceInfo,
   ];
+
+  bool? get wasOnTime => null;
 }

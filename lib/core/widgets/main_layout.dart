@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:medmind/features/auth/data/datasources/auth_remote_data_source.dart';
-import 'package:medmind/injection_container.dart';
+import '../../features/auth/presentation/pages/auth_test_page.dart';
+import '../../features/auth/data/datasources/auth_remote_data_source.dart';
+import '../../injection_container.dart';
 
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
@@ -17,12 +18,16 @@ class _MainLayoutState extends State<MainLayout> {
     MedicationListPageSimple(),
     AdherenceHistoryPageSimple(),
     ProfilePageSimple(),
+    AuthTestPage(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: _pages),
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _pages,
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: (int index) {
@@ -100,10 +105,7 @@ class DashboardPageSimple extends StatelessWidget {
                   children: [
                     const Text(
                       'Today\'s Adherence',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 16),
                     SizedBox(
@@ -136,14 +138,14 @@ class DashboardPageSimple extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-
+            
             // Today's Medications
             const Text(
               'Today\'s Medications',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12),
-
+            
             _buildMedicationCard(
               'Lisinopril',
               '10mg at 8:00 AM',
@@ -174,12 +176,7 @@ class DashboardPageSimple extends StatelessWidget {
     );
   }
 
-  Widget _buildMedicationCard(
-    String name,
-    String dosage,
-    bool taken,
-    Color color,
-  ) {
+  Widget _buildMedicationCard(String name, String dosage, bool taken, Color color) {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
@@ -194,7 +191,10 @@ class DashboardPageSimple extends StatelessWidget {
         subtitle: Text(dosage),
         trailing: taken
             ? Icon(Icons.check_circle, color: color)
-            : ElevatedButton(onPressed: () {}, child: const Text('Take Now')),
+            : ElevatedButton(
+                onPressed: () {},
+                child: const Text('Take Now'),
+              ),
       ),
     );
   }
@@ -207,7 +207,9 @@ class MedicationListPageSimple extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('My Medications')),
+      appBar: AppBar(
+        title: const Text('My Medications'),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -228,7 +230,9 @@ class MedicationListPageSimple extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
-        leading: const CircleAvatar(child: Icon(Icons.medication)),
+        leading: const CircleAvatar(
+          child: Icon(Icons.medication),
+        ),
         title: Text(name),
         subtitle: Text('$dosage • $schedule'),
         trailing: const Icon(Icons.chevron_right),
@@ -268,10 +272,7 @@ class AdherenceHistoryPageSimple extends StatelessWidget {
                   children: [
                     const Text(
                       'November 2025',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 16),
                     Row(
@@ -287,22 +288,18 @@ class AdherenceHistoryPageSimple extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-
+            
             // Recent Activity
             const Text(
               'Recent Activity',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12),
-
+            
             _buildActivityItem('Lisinopril', 'Taken today at 8:00 AM', true),
             _buildActivityItem('Metformin', 'Taken today at 12:00 PM', true),
             _buildActivityItem('Atorvastatin', 'Missed yesterday', false),
-            _buildActivityItem(
-              'Vitamin D3',
-              'Taken yesterday at 8:00 PM',
-              true,
-            ),
+            _buildActivityItem('Vitamin D3', 'Taken yesterday at 8:00 PM', true),
           ],
         ),
       ),
@@ -355,14 +352,20 @@ class ProfilePageSimple extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Profile'),
         actions: [
-          IconButton(icon: const Icon(Icons.settings), onPressed: () {}),
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {},
+          ),
         ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            const CircleAvatar(radius: 50, child: Icon(Icons.person, size: 50)),
+            const CircleAvatar(
+              radius: 50,
+              child: Icon(Icons.person, size: 50),
+            ),
             const SizedBox(height: 16),
             const Text(
               'John Doe',
@@ -373,13 +376,13 @@ class ProfilePageSimple extends StatelessWidget {
               style: TextStyle(fontSize: 14, color: Colors.grey),
             ),
             const SizedBox(height: 32),
-
+            
             _buildOption(Icons.person_outline, 'Edit Profile'),
             _buildOption(Icons.notifications_outlined, 'Notifications'),
             _buildOption(Icons.security_outlined, 'Privacy & Security'),
             _buildOption(Icons.help_outline, 'Help & Support'),
             _buildOption(Icons.info_outline, 'About'),
-
+            
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
@@ -388,7 +391,7 @@ class ProfilePageSimple extends StatelessWidget {
                   try {
                     final authDataSource = getIt<AuthRemoteDataSource>();
                     await authDataSource.signOut();
-
+                    
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
@@ -435,3 +438,4 @@ class ProfilePageSimple extends StatelessWidget {
     );
   }
 }
+

@@ -1,3 +1,4 @@
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 
@@ -21,6 +22,7 @@ class FirebaseConfig {
   }
 
   static FirebaseOptions _getFirebaseOptions() {
+<<<<<<< HEAD
     // Platform-specific Firebase configuration
     if (kIsWeb) {
       return const FirebaseOptions(
@@ -73,5 +75,6 @@ class FirebaseConfig {
     print('  • Auth Domain: ${options.authDomain ?? 'N/A'}');
     print('  • Storage Bucket: ${options.storageBucket ?? 'N/A'}');
     print('  • Messaging Sender ID: ${options.messagingSenderId ?? 'N/A'}');
+
   }
 }

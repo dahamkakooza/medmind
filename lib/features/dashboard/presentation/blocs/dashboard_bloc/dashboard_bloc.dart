@@ -1,9 +1,13 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:dartz/dartz.dart';
+import '../../../../../core/usecases/usecase.dart';
+import '../../../../../core/errors/failures.dart';
 import '../../../domain/usecases/get_today_medications.dart';
 import '../../../domain/usecases/get_adherence_stats.dart';
 import '../../../domain/usecases/log_medication_taken.dart';
 import '../../../../../core/usecases/usecase.dart';
-import '../../../../../core/services/pending_dose_tracker.dart';
+import '../../../../adherence/domain/usecases/log_medication_taken.dart' as adherence_log;
+import 'package:injectable/injectable.dart';
 import '../../../../adherence/presentation/blocs/adherence_bloc/adherence_bloc.dart';
 import '../../../../adherence/presentation/blocs/adherence_bloc/adherence_event.dart'
     as adherence_events;
@@ -11,6 +15,7 @@ import '../../../../auth/domain/repositories/auth_repository.dart';
 import 'dashboard_event.dart';
 import 'dashboard_state.dart';
 
+@injectable
 class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   final GetTodayMedications getTodayMedications;
   final GetAdherenceStats getAdherenceStats;
