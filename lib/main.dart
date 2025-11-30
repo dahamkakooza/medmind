@@ -5,128 +5,6 @@ import 'package:flutter/material.dart' hide RouterConfig;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-<<<<<<< HEAD
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:timezone/data/latest_all.dart' as tz;
-import 'package:timezone/timezone.dart' as tz;
-
-// Core imports
-import 'core/theme/app_theme.dart';
-import 'core/utils/notification_utils.dart';
-import 'config/firebase_config.dart';
-
-// Feature imports - Auth
-import 'features/auth/presentation/blocs/auth_bloc.dart';
-import 'features/auth/presentation/blocs/auth_event.dart';
-import 'features/auth/presentation/blocs/auth_state.dart';
-import 'features/auth/presentation/pages/login_page.dart';
-import 'features/auth/presentation/pages/register_page.dart';
-
-// Feature imports - Dashboard
-import 'features/dashboard/presentation/pages/dashboard_page.dart';
-import 'features/dashboard/presentation/blocs/dashboard_bloc/dashboard_bloc.dart';
-
-// Feature imports - Medication
-import 'features/medication/presentation/pages/medication_list_page.dart';
-import 'features/medication/presentation/pages/add_medication_page.dart';
-import 'features/medication/presentation/pages/medication_detail_page.dart';
-import 'features/medication/presentation/blocs/medication_bloc/medication_bloc.dart';
-import 'features/medication/domain/entities/medication_entity.dart';
-
-// Feature imports - Adherence
-import 'features/adherence/presentation/pages/adherence_history_page.dart';
-import 'features/adherence/presentation/pages/adherence_analytics_page.dart';
-import 'features/adherence/presentation/blocs/adherence_bloc/adherence_bloc.dart';
-
-// Feature imports - Profile
-import 'features/profile/presentation/pages/profile_page.dart';
-import 'features/profile/presentation/blocs/profile_bloc/profile_bloc.dart';
-
-// Feature imports - Notifications
-import 'features/notifications/presentation/pages/notification_test_page.dart';
-import 'features/medication/presentation/pages/pending_doses_page.dart';
-
-// Repository implementations
-import 'features/auth/data/repositories/auth_repository_impl.dart';
-import 'features/medication/data/repositories/medication_repository_impl.dart';
-import 'features/adherence/data/repositories/adherence_repository_impl.dart';
-import 'features/dashboard/data/repositories/dashboard_repository_impl.dart';
-import 'features/profile/data/repositories/profile_repository_impl.dart';
-
-// Data sources
-import 'features/medication/data/datasources/medication_remote_data_source.dart';
-import 'features/adherence/data/datasources/adherence_remote_data_source.dart';
-import 'features/dashboard/data/datasources/dashboard_remote_data_source.dart';
-import 'features/profile/data/datasources/profile_local_data_source.dart';
-
-// Use cases - Auth
-import 'features/auth/domain/usecases/sign_in_with_email_and_password.dart';
-import 'features/auth/domain/usecases/sign_in_with_google.dart';
-import 'features/auth/domain/usecases/sign_up.dart';
-import 'features/auth/domain/usecases/sign_out.dart';
-
-// Use cases - Dashboard
-import 'features/dashboard/domain/usecases/get_today_medications.dart';
-import 'features/dashboard/domain/usecases/get_adherence_stats.dart';
-import 'features/dashboard/domain/usecases/log_medication_taken.dart';
-
-// Use cases - Medication
-import 'features/medication/domain/usecases/get_medications.dart';
-import 'features/medication/domain/usecases/add_medication.dart';
-import 'features/medication/domain/usecases/update_medication.dart';
-import 'features/medication/domain/usecases/delete_medication.dart';
-
-// Use cases - Adherence
-import 'features/adherence/domain/usecases/get_adherence_logs.dart';
-import 'features/adherence/domain/usecases/get_adherence_summary.dart';
-import 'features/adherence/domain/usecases/log_medication_taken.dart'
-    as adherence_log;
-import 'features/adherence/domain/usecases/export_adherence_data.dart';
-
-// Use cases - Profile
-import 'features/profile/domain/usecases/get_user_preferences.dart';
-import 'features/profile/domain/usecases/save_user_preferences.dart';
-import 'features/profile/domain/usecases/update_theme_mode.dart';
-import 'features/profile/domain/usecases/update_notifications.dart';
-
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  try {
-    // Initialize Firebase
-    await FirebaseConfig.initialize();
-
-    // Initialize timezone data for notifications
-    tz.initializeTimeZones();
-    // Use device's local timezone
-    final String timeZoneName = DateTime.now().timeZoneName;
-    try {
-      tz.setLocalLocation(tz.getLocation(timeZoneName));
-      print('📍 Using timezone: $timeZoneName');
-    } catch (e) {
-      // Fallback to UTC if device timezone not found
-      tz.setLocalLocation(tz.UTC);
-      print('⚠️ Could not find timezone $timeZoneName, using UTC');
-    }
-
-    // Initialize notifications
-    await NotificationUtils.initialize();
-    await NotificationUtils.requestPermissions();
-
-    // Get SharedPreferences instance
-    final sharedPreferences = await SharedPreferences.getInstance();
-
-    runApp(MedMindApp(sharedPreferences: sharedPreferences));
-  } catch (e) {
-    // If Firebase initialization fails, still run the app but show error
-    print('Firebase initialization failed: $e');
-    final sharedPreferences = await SharedPreferences.getInstance();
-    runApp(
-      MedMindApp(
-        sharedPreferences: sharedPreferences,
-        initializationError: e.toString(),
-=======
 
 // Core imports
 import 'core/theme/app_theme.dart';
@@ -194,13 +72,11 @@ class MedMindApp extends StatelessWidget {
         onGenerateRoute: RouterConfig.generateRoute,
         initialRoute: RouteConstants.splash,
         navigatorKey: getIt<GlobalKey<NavigatorState>>(),
->>>>>>> 834de40 (added some more pages in profile)
       ),
     );
   }
 }
 
-<<<<<<< HEAD
 class MedMindApp extends StatelessWidget {
   final SharedPreferences sharedPreferences;
   final String? initializationError;
@@ -210,6 +86,21 @@ class MedMindApp extends StatelessWidget {
     required this.sharedPreferences,
     this.initializationError,
   });
+
+  static Locale _getLocaleFromLanguage(String language) {
+    switch (language.toLowerCase()) {
+      case 'spanish':
+      case 'es':
+        return const Locale('es', 'ES');
+      case 'french':
+      case 'fr':
+        return const Locale('fr', 'FR');
+      case 'english':
+      case 'en':
+      default:
+        return const Locale('en', 'US');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -319,120 +210,169 @@ class MedMindApp extends StatelessWidget {
                 saveUserPreferences: SaveUserPreferences(profileRepo),
                 updateThemeMode: UpdateThemeMode(profileRepo),
                 updateNotifications: UpdateNotifications(profileRepo),
-              );
+              )..add(LoadPreferences()); // Load preferences on app start
             },
           ),
         ],
-        child: MaterialApp(
-          title: 'MedMind',
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          themeMode: ThemeMode.system,
-          home: initializationError != null
-              ? ErrorScreen(error: initializationError!)
-              : const AuthWrapper(),
-          onGenerateRoute: (settings) {
-            // Handle navigation routes
-            switch (settings.name) {
-              // Auth routes
-              case '/login':
-                return MaterialPageRoute(builder: (_) => const LoginPage());
-              case '/register':
-                return MaterialPageRoute(builder: (_) => const RegisterPage());
-              case '/forgot-password':
-                return MaterialPageRoute(
-                  builder: (_) => Scaffold(
-                    appBar: AppBar(title: const Text('Reset Password')),
-                    body: const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(24.0),
-                        child: Text(
-                          'Password reset functionality coming soon!\n\nFor now, you can reset your password through Firebase Console.',
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-
-              // Dashboard route
-              case '/dashboard':
-                return MaterialPageRoute(builder: (_) => const DashboardPage());
-
-              // Medication routes
-              case '/medications':
-                return MaterialPageRoute(
-                  builder: (_) => const MedicationListPage(),
-                );
-              case '/add-medication':
-                return MaterialPageRoute(
-                  builder: (_) => const AddMedicationPage(),
-                );
-              case '/edit-medication':
-                final medication = settings.arguments;
-                if (medication != null) {
-                  return MaterialPageRoute(
-                    builder: (_) => AddMedicationPage(
-                      medication: medication as MedicationEntity,
-                    ),
-                  );
-                }
-                return null;
-              case '/medication-detail':
-                final medication = settings.arguments;
-                if (medication != null) {
-                  return MaterialPageRoute(
-                    builder: (_) =>
-                        MedicationDetailPage(medication: medication as dynamic),
-                  );
-                }
-                return null;
-
-              // Adherence routes
-              case '/adherence-history':
-                return MaterialPageRoute(
-                  builder: (_) => const AdherenceHistoryPage(),
-                );
-              case '/adherence-analytics':
-                return MaterialPageRoute(
-                  builder: (_) => const AdherenceAnalyticsPage(),
-                );
-
-              // Profile routes
-              case '/profile':
-                return MaterialPageRoute(builder: (_) => const ProfilePage());
-              case '/settings':
-                return MaterialPageRoute(
-                  builder: (_) => Scaffold(
-                    appBar: AppBar(title: const Text('Settings')),
-                    body: const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(24.0),
-                        child: Text(
-                          'Settings page coming soon!',
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-
-              // Notifications
-              case '/notifications':
-                return MaterialPageRoute(
-                  builder: (_) => const NotificationTestPage(),
-                );
-
-              // Pending Doses
-              case '/pending-doses':
-                return MaterialPageRoute(
-                  builder: (_) => const PendingDosesPage(),
-                );
-
-              default:
-                return null;
+        child: BlocBuilder<ProfileBloc, profile_state.ProfileState>(
+          builder: (context, profileState) {
+            // Extract theme mode from profile state
+            ThemeMode themeMode = ThemeMode.system;
+            if (profileState is profile_state.PreferencesLoaded) {
+              themeMode = profileState.preferences.themeMode;
+            } else if (profileState is profile_state.PreferencesUpdated) {
+              themeMode = profileState.preferences.themeMode;
             }
+
+            // Extract locale from profile state
+            Locale locale = const Locale('en', 'US');
+            if (profileState is profile_state.PreferencesLoaded) {
+              locale = _getLocaleFromLanguage(
+                profileState.preferences.language,
+              );
+            } else if (profileState is profile_state.PreferencesUpdated) {
+              locale = _getLocaleFromLanguage(
+                profileState.preferences.language,
+              );
+            }
+
+            return MaterialApp(
+              title: 'MedMind',
+              debugShowCheckedModeBanner: false,
+              theme: AppTheme.lightTheme,
+              darkTheme: AppTheme.darkTheme,
+              themeMode: themeMode,
+              locale: locale,
+              localizationsDelegates: const [
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: const [
+                Locale('en', 'US'), // English
+                Locale('es', 'ES'), // Spanish
+                Locale('fr', 'FR'), // French
+              ],
+              home: initializationError != null
+                  ? ErrorScreen(error: initializationError!)
+                  : const AuthWrapper(),
+              onGenerateRoute: (settings) {
+                // Handle navigation routes
+                switch (settings.name) {
+                  // Auth routes
+                  case '/login':
+                    return MaterialPageRoute(builder: (_) => const LoginPage());
+                  case '/register':
+                    return MaterialPageRoute(
+                      builder: (_) => const RegisterPage(),
+                    );
+                  case '/forgot-password':
+                    return MaterialPageRoute(
+                      builder: (_) => Scaffold(
+                        appBar: AppBar(title: const Text('Reset Password')),
+                        body: const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(24.0),
+                            child: Text(
+                              'Password reset functionality coming soon!\n\nFor now, you can reset your password through Firebase Console.',
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+
+                  // Dashboard route
+                  case '/dashboard':
+                    return MaterialPageRoute(
+                      builder: (_) => const DashboardPage(),
+                    );
+
+                  // Medication routes
+                  case '/medications':
+                    return MaterialPageRoute(
+                      builder: (_) => const MedicationListPage(),
+                    );
+                  case '/add-medication':
+                    return MaterialPageRoute(
+                      builder: (_) => const AddMedicationPage(),
+                    );
+                  case '/edit-medication':
+                    final medication = settings.arguments;
+                    if (medication != null) {
+                      return MaterialPageRoute(
+                        builder: (_) => AddMedicationPage(
+                          medication: medication as MedicationEntity,
+                        ),
+                      );
+                    }
+                    return null;
+                  case '/medication-detail':
+                    final medication = settings.arguments;
+                    if (medication != null) {
+                      return MaterialPageRoute(
+                        builder: (_) => MedicationDetailPage(
+                          medication: medication as dynamic,
+                        ),
+                      );
+                    }
+                    return null;
+
+                  // Adherence routes
+                  case '/adherence-history':
+                    return MaterialPageRoute(
+                      builder: (_) => const AdherenceHistoryPage(),
+                    );
+                  case '/adherence-analytics':
+                    return MaterialPageRoute(
+                      builder: (_) => const AdherenceAnalyticsPage(),
+                    );
+
+                  // Profile routes
+                  case '/profile':
+                    return MaterialPageRoute(
+                      builder: (_) => const ProfilePage(),
+                    );
+                  case '/profile/edit':
+                    return MaterialPageRoute(
+                      builder: (_) => const EditProfilePage(),
+                    );
+                  case '/profile/notifications':
+                    return MaterialPageRoute(
+                      builder: (_) => const NotificationTestPage(),
+                    );
+                  case '/profile/privacy-security':
+                    return MaterialPageRoute(
+                      builder: (_) => const PrivacySecurityPage(),
+                    );
+                  case '/profile/help-support':
+                    return MaterialPageRoute(
+                      builder: (_) => const HelpSupportPage(),
+                    );
+                  case '/profile/about':
+                    return MaterialPageRoute(builder: (_) => const AboutPage());
+                  case '/settings':
+                    return MaterialPageRoute(
+                      builder: (_) => const SettingsPage(),
+                    );
+
+                  // Notifications
+                  case '/notifications':
+                    return MaterialPageRoute(
+                      builder: (_) => const NotificationTestPage(),
+                    );
+
+                  // Pending Doses
+                  case '/pending-doses':
+                    return MaterialPageRoute(
+                      builder: (_) => const PendingDosesPage(),
+                    );
+
+                  default:
+                    return null;
+                }
+              },
+            );
           },
         ),
       ),
